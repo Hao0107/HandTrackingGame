@@ -9,7 +9,7 @@ UDP_IP = "127.0.0.1"
 UDP_PORT = 4141
 
 # Camera
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 cap.set(3, width)
 cap.set(4, height)
 
@@ -41,7 +41,7 @@ while True:
         # CHÚ Ý: Chuyển list số thành chuỗi, không cần dấu ngoặc vuông[]
         data_string = ",".join(map(str, data))
 
-        # print(data)
+        print(data)
         sock.sendto(str.encode(str(data)), serverAddressPort)
 
     img = cv2.resize(img, (0, 0), None, 0.25, 0.25)
