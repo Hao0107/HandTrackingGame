@@ -364,6 +364,7 @@
 "Assets/Scripts/HandTracking.cs"
 "Assets/Scripts/InstantiateObject.cs"
 "Assets/Scripts/Line.cs"
+"Assets/Scripts/PinchHitbox.cs"
 "Assets/Scripts/UDPReceive.cs"
 "Assets/Scripts/UI_Manager.cs"
 "Assets/TextMesh Pro/Examples & Extras/Scripts/Benchmark01.cs"
