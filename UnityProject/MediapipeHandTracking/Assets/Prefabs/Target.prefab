@@ -13,9 +13,9 @@ GameObject:
   - component: {fileID: 3032299387123395430}
   - component: {fileID: 3946987646565189873}
   - component: {fileID: 3704085575793514469}
-  - component: {fileID: 4626533484195659590}
   - component: {fileID: 2312939817064615170}
   - component: {fileID: -8242225335215589589}
+  - component: {fileID: -5689016715768575356}
   m_Layer: 0
   m_Name: Target
   m_TagString: Target
@@ -17437,28 +17437,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1277147988734151424}
   m_Mesh: {fileID: 0}
---- !u!64 &4626533484195659590
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1277147988734151424}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 0}
 --- !u!135 &2312939817064615170
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -17493,3 +17471,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lifetime: 5
+--- !u!114 &-5689016715768575356
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1277147988734151424}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 483b0249e8f05a947ab01adc0b755aa2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rotationSpeed: 360
+  penaltyAmount: 20

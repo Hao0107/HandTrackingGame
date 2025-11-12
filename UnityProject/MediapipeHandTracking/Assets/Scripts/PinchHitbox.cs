@@ -5,17 +5,30 @@ public class PinchHitbox : MonoBehaviour
 {
     private TargetManager manager;
 
+    [Header("Bad Explosion Effect")]
+    public GameObject badExplosionEffectPrefab;
+
     void Start()
     {
         manager = FindObjectOfType<TargetManager>();
-        // Destroy(gameObject, 0.5f); 
     }
 
     private void OnTriggerEnter(Collider other)
     {
+        if (manager == null) return;
+
+        Vector3 targetPosition = other.transform.position;
+
+        BadTarget badTarget = other.gameObject.GetComponent<BadTarget>();
+        if (badTarget != null)
+        {
+            badTarget.OnHit();
+            Instantiate(badExplosionEffectPrefab, targetPosition, Quaternion.identity);
+            return;
+        }
+
         if (other.gameObject.CompareTag("Target") && manager != null)
         {
-            Vector3 targetPosition = other.transform.position;
 
             manager.currentScore += manager.pointsPerTarget;
             manager.UpdateScoreDisplay();

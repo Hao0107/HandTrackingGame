@@ -2,49 +2,96 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class UI_Manager : MonoBehaviour
 {
-    [Header("UI Control Settings")]
-    public Slider targetSlider;
-    //public TextMeshPro selectedValueText;
-    public GameObject UIHandCursor;
+    [Header("Menu Panel")]
+    public GameObject pauseMenuPanel;
+    public GameObject settingsPanel;
+    private bool isPaused = false;
 
-    [Header("Slider Mapping Range(for hand)")]
-    public float minYPosition = 1.0f;
-    public float maxYPosition = 5.0f;
+    [Header("Audio")]
+    public AudioSource bgmSource;
+    public AudioSource settingMusic;
 
-    public void HighlightSlider(float normalizedYPosition)
+    public void TogglePause()
     {
-        if (targetSlider == null) return;
+        isPaused = !isPaused;
+        pauseMenuPanel.SetActive(isPaused);
 
-        float value = (normalizedYPosition - minYPosition) / (maxYPosition - minYPosition);
+        if (isPaused)
+        {
+            Time.timeScale = 0f; // game time stop
+            if (bgmSource != null)
+            {
+                bgmSource.Stop();
+                settingMusic.Play();
+            }
+        }
+        else
+        {
+            Time.timeScale = 1f; // run game time
+            if (bgmSource != null)
+            {
+                bgmSource.Play();
+                settingMusic.Stop();
+            }
+        }
 
-        value = Mathf.Clamp01(value);
-
-        targetSlider.value = value;
-
-        //if (selectedValueText != null)
-        //{
-        //    selectedValueText.text = $"Value: {targetSlider.value:F2}";
-        //}
+        Debug.Log("Game Paused: " + isPaused);
     }
 
-    public void ConfirmSelection()
+    public void ResumeGame()
     {
-        if (targetSlider == null) return;
-
-        Debug.Log($"CONFIRMED SELECTION: Slider value set to {targetSlider.value:F2}");
-    }
-    // Start is called before the first frame update
-    void Start()
-    {
-        
+        if (isPaused)
+        {
+            TogglePause(); // TogglePause
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    public void ResetGame()
     {
-        
+        Time.timeScale = 1f;
+
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    public void QuitGame()
+    {
+        Debug.Log("Quitting Game...");
+        Application.Quit();
+
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#endif
+    }
+
+    public void OpenSettings()
+    {
+        if (pauseMenuPanel != null)
+        {
+            pauseMenuPanel.SetActive(false);
+        }
+
+        if (settingsPanel != null)
+        {
+            settingsPanel.SetActive(true);
+        }
+    }
+
+    public void CloseSettings()
+    {
+        if (settingsPanel != null)
+        {
+            settingsPanel.SetActive(false);
+        }
+
+        if (pauseMenuPanel != null)
+        {
+            pauseMenuPanel.SetActive(true);
+        }
+
+        Debug.Log("Settings Panel Closed. Back to Pause Menu.");
     }
 }

@@ -8,7 +8,6 @@ using TMPro;
 public class HandTracking : MonoBehaviour
 {
     public TargetManager targetManager;
-    public UI_Manager uiManager;
 
     public UdpReceiver UDPReceive;
 
@@ -27,7 +26,6 @@ public class HandTracking : MonoBehaviour
     [Header("Cursor & Click Settings")]
     public float Z_Fixed_Position = 4f;
     public float Z_Click_Threshold = -30f;
-    private bool isPinching = false;
 
     private const int TOTAL_LANDMARKS = 42;
 

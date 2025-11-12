@@ -9,7 +9,10 @@ UDP_IP = "127.0.0.1"
 UDP_PORT = 4141
 
 # Camera
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
+if not cap.isOpened():
+    print("Lỗi: Không tìm thấy camera.")
+    exit()
 cap.set(3, width)
 cap.set(4, height)
 

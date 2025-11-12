@@ -3,24 +3,31 @@ using System.Collections;
 using System;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections.Generic;
 
 public class TargetManager : MonoBehaviour
 {
-    // Tham chiếu đến script HandTracking để lấy dữ liệu điểm
     [Header("Dependencies")]
     public HandTracking handTrackingScript;
 
     [Header("Target Settings")]
-    public GameObject targetPrefab;
+    public GameObject goodTargetPrefab;
+    public GameObject badTargetPrefab;
     public float spawnInterval = 2f;
     public float spawnRangeX = 5f;   // Phạm vi X ngẫu nhiên (từ -4 đến 4)
     public float spawnRangeY = 8.0f;   // Phạm vi Y ngẫu nhiên (từ 0 đến 4)
     public float targetZ = 4f;      // Vị trí Z cố định của Target (nên khớp với Z_Fixed_Position)
 
+    [Header("Spawn Collision Settings")]
+    public float minDistanceBetweenTargets = 1.5f; // Khoảng cách tối thiểu giữa các Target
+    public int maxSpawnAttempts = 10;
+    public float badTargetSpawnChance = 0.2f;
+
     [Header("Score Settings")]
-    public TextMeshProUGUI scoreTextTMP; // Kéo đối tượng TextMeshPro UI vào đây
+    public TextMeshProUGUI scoreTextTMP;
     public int currentScore = 0;
     public int pointsPerTarget = 10;
+    private List<GameObject> activeTargets = new List<GameObject>();
 
     [Header("Effects")]
     public GameObject[] explosionEffectPrefabs;
@@ -66,16 +73,66 @@ public class TargetManager : MonoBehaviour
 
     void SpawnTarget()
     {
-        if (targetPrefab == null) return;
+        GameObject prefabToSpawn;
 
-        float randomX = UnityEngine.Random.Range(-spawnRangeX, spawnRangeX);
-        float randomY = UnityEngine.Random.Range(2.1f, spawnRangeY);
-        Vector3 spawnPosition = new Vector3(randomX, randomY, targetZ);
+        if (UnityEngine.Random.value < badTargetSpawnChance)
+        {
+            prefabToSpawn = badTargetPrefab;
+        }
+        else
+        {
+            prefabToSpawn = goodTargetPrefab;
+        }
 
-        Quaternion spawnRotation = Quaternion.Euler(90f, 90f, 90f);
+        Vector3 spawnPosition = Vector3.zero;
+        bool foundValidPosition = false;
 
-        Instantiate(targetPrefab, spawnPosition, spawnRotation);
-    }   
+        for (int i = 0; i < maxSpawnAttempts; i++)
+        {
+            float randomX = UnityEngine.Random.Range(-spawnRangeX, spawnRangeX);
+            float randomY = UnityEngine.Random.Range(2.1f, spawnRangeY);
+
+            Vector3 potentialPosition = new Vector3(randomX, randomY, targetZ);
+
+            if (IsPositionValid(potentialPosition))
+            {
+                spawnPosition = potentialPosition;
+                foundValidPosition = true;
+                break;
+            }
+        }
+        if (foundValidPosition)
+        {
+            float randomRotation = UnityEngine.Random.Range(0, 360f);
+            Quaternion spawnRotation = Quaternion.Euler(randomRotation, 90f, 90f);
+            GameObject newTarget = Instantiate(prefabToSpawn, spawnPosition, spawnRotation);
+            activeTargets.Add(newTarget);
+        }
+    }
+
+    public void RemoveTargetFromList(GameObject targetToRemove)
+    {
+        if (activeTargets.Contains(targetToRemove))
+        {
+            activeTargets.Remove(targetToRemove);
+        }
+    }
+
+    bool IsPositionValid(Vector3 position)
+    {
+        foreach (GameObject target in activeTargets)
+        {
+            if (target == null) continue;
+
+            float distance = Vector3.Distance(position, target.transform.position);
+
+            if (distance < minDistanceBetweenTargets)
+            {
+                return false;
+            }
+        }
+        return true; // Hợp lệ
+    }
 
     public void HandleHandPinch(string[] points, int handIndex)
     {
@@ -154,6 +211,25 @@ public class TargetManager : MonoBehaviour
         {
             scoreTextTMP.text = $"{currentScore}";
         }
+    }
+
+    public void AddScore(int amount)
+    {
+        currentScore += amount;
+        UpdateScoreDisplay();
+    }
+
+    public void DeductScore(int amount)
+    {
+        if(currentScore - amount < 0)
+        {
+            currentScore = 0;
+        }
+        else
+        {
+            currentScore -= amount;
+        }
+        UpdateScoreDisplay();
     }
 
     public float GetPinchDistance(string[] points, int handIndex)

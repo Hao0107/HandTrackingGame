@@ -5,7 +5,7 @@ m_ProjectFiles:
     m_ContentTrackingEnabled: 1
     m_ModificationDate:
       serializedVersion: 2
-      ticks: 638980013380392462
+      ticks: 638984388520000000
     m_Hash: 826045187
   m_LockFileStatus:
     m_FilePath: D:/HandTrackingGame/UnityProject/MediapipeHandTracking/Packages/packages-lock.json
@@ -13,7 +13,7 @@ m_ProjectFiles:
     m_ContentTrackingEnabled: 1
     m_ModificationDate:
       serializedVersion: 2
-      ticks: 638980013380491869
+      ticks: 638984388520000000
     m_Hash: 2723933808
 m_EmbeddedPackageManifests:
   m_ManifestsStatus: {}
@@ -128,6 +128,7 @@ m_ResolvedPackages:
     - 2.9.3
     - 2.10.0
     - 2.10.1
+    - 2.10.2
     compatible:
     - 2.7.1
     - 2.8.1
@@ -137,6 +138,7 @@ m_ResolvedPackages:
     - 2.9.3
     - 2.10.0
     - 2.10.1
+    - 2.10.2
     recommended: 2.7.1
     deprecated: []
   dependencies: []
