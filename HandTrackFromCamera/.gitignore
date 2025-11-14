@@ -1,8 +1,0 @@
-# Build
-/build/
-
-# IDE
-.idea/
-
-# Virtual Environment
-.venv/
