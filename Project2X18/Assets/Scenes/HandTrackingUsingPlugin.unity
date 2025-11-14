@@ -1387,9 +1387,21 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 343187373}
     - target: {fileID: 3455077979186316384, guid: cf4908440453ac543bdf71c963d851b3, type: 3}
+      propertyPath: runningMode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3455077979186316384, guid: cf4908440453ac543bdf71c963d851b3, type: 3}
       propertyPath: _handLandmarkerResultAnnotationController
       value: 
       objectReference: {fileID: 179934994}
+    - target: {fileID: 3455077979186316384, guid: cf4908440453ac543bdf71c963d851b3, type: 3}
+      propertyPath: OnLandmarkerResult.m_PersistentCalls.m_Calls.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3455077979186316384, guid: cf4908440453ac543bdf71c963d851b3, type: 3}
+      propertyPath: OnLandmarkerResult.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 6942340434231809612, guid: cf4908440453ac543bdf71c963d851b3, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -2579,7 +2591,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1348298597
 MonoBehaviour:
   m_ObjectHideFlags: 0
