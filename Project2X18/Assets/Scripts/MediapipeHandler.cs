@@ -9,6 +9,7 @@ using Mediapipe.Tasks.Vision.HandLandmarker;
 using Mediapipe.Tasks.Components.Containers; // need for Landmark/Category
 using Mediapipe.Unity.Sample.HandLandmarkDetection; // need for HandLandmarkerRunner
 
+
 public class MediaPipeHandler : MonoBehaviour
 {
     [Header("Plugin Dependencies")]

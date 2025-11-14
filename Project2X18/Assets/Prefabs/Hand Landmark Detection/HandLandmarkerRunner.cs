@@ -19,7 +19,6 @@ namespace Mediapipe.Unity.Sample.HandLandmarkDetection
     private Experimental.TextureFramePool _textureFramePool;
 
     public readonly HandLandmarkDetectionConfig config = new HandLandmarkDetectionConfig();
-
     public UnityEvent<HandLandmarkerResult> OnLandmarkerResult = new UnityEvent<HandLandmarkerResult>();
 
     public override void Stop()
@@ -157,7 +156,7 @@ namespace Mediapipe.Unity.Sample.HandLandmarkDetection
     private void OnHandLandmarkDetectionOutput(HandLandmarkerResult result, Image image, long timestamp)
     {
       _handLandmarkerResultAnnotationController.DrawLater(result);
-        OnLandmarkerResult.Invoke(result);
+       OnLandmarkerResult.Invoke(result);
     }
   }
 }
