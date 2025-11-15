@@ -1,0 +1,118 @@
+{
+	"sort_by": "difficulty_avg",
+	"sort_order": "ascending",
+	"mean_type": "arithmetic",
+	"level_list": [
+		{
+			"display_title": {
+				"default": "Massif"
+			},
+			"display_gems": {
+				"default": 20
+			},
+			"display_crowns": {
+				"default": 0
+			},
+			"display_author": {
+				"default": false
+			},
+			"display_progress": {
+				"default": true
+			},
+			"display_background": {
+				"default": 0
+			},
+			"level_difficulty_easy": {
+				"default": 0.7
+			},
+			"level_difficulty_hard": {
+				"default": 0.9
+			},
+			"level_id": "valea",
+			"level_variations": [
+				"default"
+			],
+			"default_variation": "default"
+		},
+		{
+			"display_title": {
+				"default": "Sky"
+			},
+			"display_gems": {
+				"default": 20
+			},
+			"display_crowns": {
+				"default": 0
+			},
+			"display_author": {
+				"default": false
+			},
+			"display_progress": {
+				"default": true
+			},
+			"display_background": {
+				"default": 1
+			},
+			"level_difficulty_easy": {
+				"default": 2.2
+			},
+			"level_difficulty_hard": {
+				"default": 2.5
+			},
+			"level_id": "aperta",
+			"level_variations": [
+				"default"
+			],
+			"default_variation": "default"
+		},
+		{
+			"display_title": {
+				"older": "Forest",
+				"old": "Forest",
+				"new": "Forest"
+			},
+			"display_gems": {
+				"older": 20,
+				"old": 20,
+				"new": 10
+			},
+			"display_crowns": {
+				"older": 0,
+				"old": 3,
+				"new": 3
+			},
+			"display_author": {
+				"older": false,
+				"old": false,
+				"new": false
+			},
+			"display_progress": {
+				"older": true,
+				"old": true,
+				"new": true
+			},
+			"display_background": {
+				"older": 2,
+				"old": 2,
+				"new": 2
+			},
+			"level_difficulty_easy": {
+				"older": 3.3,
+				"old": 3.3,
+				"new": 3.3
+			},
+			"level_difficulty_hard": {
+				"older": 3.7,
+				"old": 3.8,
+				"new": 4.0
+			},
+			"level_id": "gardenea",
+			"level_variations": [
+				"older",
+				"old",
+				"new"
+			],
+			"default_variation": "old"
+		}
+	]
+}

@@ -1,0 +1,85 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags:
+  - Obstacle
+  - obstacle1
+  - obstacle2
+  - JumpTile
+  - Balus
+  - NormalTile
+  - Background
+  - Riser
+  - Base
+  - ColoredPart
+  - JumpCollision
+  - Theme
+  - Grid
+  - GlassCollision
+  - GlassTile
+  - GlassGroup1
+  - GlassCollisionGroup1
+  - GlassGroup2
+  - GlassCollisionGroup2
+  - GlassGroup3
+  - GlassCollisionGroup3
+  - NormalCollision
+  - Edge
+  - DiamondCollision
+  - LevelEnd
+  - NormalEndCollision
+  - MoverGroup1
+  - MoverArrowCollision
+  - MoverCollisionGroup1
+  - MoverGroup2
+  - MoverCollisionGroup2
+  - MoverGroup3
+  - MoverCollisionGroup3
+  - MoverAutoGroup1
+  - MoverAutoCollisionGroup1
+  - MoverAutoGroup2
+  - MoverAutoCollisionGroup2
+  - MoverAutoGroup3
+  - MoverAutoCollisionGroup3
+  - MoverAutoArrowCollision
+  - CrownCollision
+  - Reference
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0
