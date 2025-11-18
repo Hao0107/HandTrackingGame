@@ -53,24 +53,32 @@ public class LevelConfigurator : MonoBehaviour
     TMP_InputField musicPathInput;
     Slider levelSpeedSlider;
     Toggle startPortalToggle;
+    [Header("Start Portal Object")]
     public GameObject startPortalObject2;
     public List<string> levelFilePaths = new List<string>();
+
+    private LevelEditor levelEditor;
     // Start is called before the first frame update
     void Start()
     {
         //balus = GameObject.FindGameObjectWithTag("Balus");
         rb = balus.GetComponent<Rigidbody>();
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
-        if (gameManager.isDataDownloaded) {
-            levelFilePaths.Add(Application.persistentDataPath);
-            string correctFilePath = levelFilePaths.FirstOrDefault(x => File.Exists(x + "/" + jsonFilePath + ".json"));
-            if (correctFilePath == null) {
-                Debug.LogError("File not found");
+        string persistentPath = Path.Combine(Application.persistentDataPath, jsonFilePath + ".json");
+
+        if (File.Exists(persistentPath))
+        {
+            jsonString = File.ReadAllText(persistentPath);
+        }
+        else
+        {
+            TextAsset asset = Resources.Load<TextAsset>(jsonFilePath);
+            if (asset != null) jsonString = asset.text;
+            else
+            {
+                Debug.LogError($"[Config] File not found: {jsonFilePath}");
                 return;
             }
-            jsonString = File.ReadAllText(correctFilePath + "/" + jsonFilePath + ".json");
-        } else {
-            jsonString = Resources.Load<TextAsset>(jsonFilePath).text;
         }
         LevelConfigJson config = JsonConvert.DeserializeObject<LevelConfigJson>(jsonString);
         levelName = config.level_name;
@@ -81,22 +89,56 @@ public class LevelConfigurator : MonoBehaviour
         worldshowPath = config.worldshow_path;
         startPortal = config.start_portal;
         startPortalObject2 = GameObject.Find("DeceBalus_Pod_Start");
-        startPortalObject2.SetActive(false);
+        //startPortalObject2.SetActive(false);
         //rb.position = new Vector3(balus.transform.position.x, balus.transform.position.y, startPos);
+
+        GameObject balusObj = GameObject.Find("Balus");
+        if (balusObj != null)
+        {
+            levelEditor = balusObj.GetComponent<LevelEditor>();
+        }
+        else
+        {
+            Debug.LogError("Could not find GameObject named 'Balus'");
+        }
     }
 
-    public void LoadLevelConfig() {
-        if (gameManager.isDataDownloaded) {
-            string correctFilePath = levelFilePaths.FirstOrDefault(x => File.Exists(x + "/" + jsonFilePath + ".json"));
-            if (correctFilePath == null) {
-                Debug.LogError("File not found");
-                return;
-            }
-            jsonString = File.ReadAllText(correctFilePath + "/" + jsonFilePath + ".json");
-        } else {
-            jsonString = Resources.Load<TextAsset>(jsonFilePath).text;
+    public void LoadLevelConfig()
+    {
+        if (gameManager == null)
+        {
+            GameObject gmObj = GameObject.Find("GameManager");
+            if (gmObj != null) gameManager = gmObj.GetComponent<GameManager>();
         }
+
+        if (gameManager != null && gameManager.isDataDownloaded)
+        {
+            string persistentPath = Path.Combine(Application.persistentDataPath, jsonFilePath + ".json");
+            if (File.Exists(persistentPath))
+            {
+                jsonString = File.ReadAllText(persistentPath);
+            }
+            else
+            {
+                TextAsset asset = Resources.Load<TextAsset>(jsonFilePath);
+                if (asset != null) jsonString = asset.text;
+                else
+                {
+                    Debug.LogError($"Config not found: {jsonFilePath}");
+                    return;
+                }
+            }
+        }
+        else
+        {
+            TextAsset asset = Resources.Load<TextAsset>(jsonFilePath);
+            if (asset != null) jsonString = asset.text;
+            else return;
+        }
+
         LevelConfigJson config = JsonConvert.DeserializeObject<LevelConfigJson>(jsonString);
+        if (config == null) return;
+
         levelName = config.level_name;
         levelAuthor = config.level_author;
         levelSpeed = config.level_speed;
@@ -104,12 +146,28 @@ public class LevelConfigurator : MonoBehaviour
         musicPath = config.music_path;
         worldshowPath = config.worldshow_path;
         startPortal = config.start_portal;
-        if (startPortal) {
-            startPortalObject2.SetActive(true);
-            startPortalObject2.transform.position = new Vector3(0f, 0f, startPos);
-        } else {
-            startPortalObject2.SetActive(false);
-            startPortalObject2.transform.position = new Vector3(0f, 0f, startPos);
+
+        if (startPortalObject2 == null)
+        {
+            startPortalObject2 = GameObject.Find("DeceBalus_Pod_Start");
+        }
+
+        if (startPortalObject2 != null)
+        {
+            if (startPortal)
+            {
+                startPortalObject2.SetActive(true);
+                startPortalObject2.transform.position = new Vector3(0f, 0f, startPos);
+            }
+            else
+            {
+                startPortalObject2.SetActive(false);
+                startPortalObject2.transform.position = new Vector3(0f, 0f, startPos);
+            }
+        }
+        else
+        {
+            Debug.LogWarning("Can't find 'DeceBalus_Pod_Start' in Scene");
         }
     }
 
@@ -148,7 +206,9 @@ public class LevelConfigurator : MonoBehaviour
         startPortalToggle = startPortalObject.GetComponent<Toggle>();
         startPortalToggle.isOn = startPortal;
         LevelEditor le = GameObject.Find("Balus").GetComponent<LevelEditor>();
-        le.SetPopupOpen(true);
+        if(levelEditor != null) {
+            levelEditor.SetPopupOpen(true);
+        }
     }
 
     public void CloseConfigPanel() {
@@ -168,6 +228,27 @@ public class LevelConfigurator : MonoBehaviour
             startPortalObject2.SetActive(false);
             startPortalObject2.transform.position = new Vector3(0f, 0f, startPos);
         }
+
+        if (levelEditor != null)
+        {
+            levelEditor.SetPopupOpen(false);
+        }
+        else
+        {
+            GameObject balusObj = GameObject.Find("Balus");
+            if (balusObj != null)
+            {
+                levelEditor = balusObj.GetComponent<LevelEditor>();
+                if (levelEditor != null)
+                {
+                    levelEditor.SetPopupOpen(false);
+                }
+            }
+
+            if (levelEditor == null)
+                Debug.LogWarning("LevelEditor component not found on 'Balus' object, popup state not updated.");
+        }
+
         levelConfigPanel.SetActive(false);
         LevelEditor le = GameObject.Find("Balus").GetComponent<LevelEditor>();
         le.SetPopupOpen(false);

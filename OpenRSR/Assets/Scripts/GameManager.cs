@@ -135,11 +135,21 @@ public class GameManager : MonoBehaviour
         && File.Exists(Path.Combine(Application.persistentDataPath, "WorldShow/World_valea.png"))
         && File.Exists(Path.Combine(Application.persistentDataPath, "WorldShow/World_aperta.png"))
         && File.Exists(Path.Combine(Application.persistentDataPath, "WorldShow/World_gardenea.png"))
-        && File.Exists(Path.Combine(Application.persistentDataPath, "MenuData/MenuData.json"));
+        && File.Exists(Path.Combine(Application.persistentDataPath, "MenuData/MenuData.json"))
+
+        // My data
+        && File.Exists(Path.Combine(Application.persistentDataPath, "LevelData/Level_mylevel.json"))  
+        && File.Exists(Path.Combine(Application.persistentDataPath, "LevelData/Themes_mylevel.json"))
+        && File.Exists(Path.Combine(Application.persistentDataPath, "LevelData/Config_mylevel.json"))
+        && File.Exists(Path.Combine(Application.persistentDataPath, "LevelData/GeoBuffer_mylevel.json"));
+
     }
     
     void Start()
     {
+
+        //GenerateMyLongLevel();
+
         instance = this;
         percentTextLabel = GameObject.Find("Percent");
         percentTextMesh = percentTextLabel.GetComponent<TextMeshProUGUI>();
@@ -184,6 +194,8 @@ public class GameManager : MonoBehaviour
         {
             isDataDownloaded = true;
             isDataDownloadedCache = true;
+
+            LoadLevel("mylevel");
         }
         else
         {
@@ -202,7 +214,6 @@ public class GameManager : MonoBehaviour
             GFreeze.enabled = false;
             //gre.enabled = false;
             //ere.enabled = false;
-            levelRenderer.levelFilePaths.Add(Application.persistentDataPath);
             levelRenderer.enabled = false;
             themeChanger.enabled = false;
             if (sphm != null) {
@@ -223,7 +234,6 @@ public class GameManager : MonoBehaviour
             rb.useGravity = false;
             //gre.enabled = false;
             //ere.enabled = false;
-            levelRenderer.levelFilePaths.Add(Application.persistentDataPath);
             levelRenderer.enabled = false;
             themeChanger.enabled = false;
             sphm.enabled = false;
@@ -281,7 +291,14 @@ public class GameManager : MonoBehaviour
                 + ConvertBoolToInt(!File.Exists(Path.Combine(Application.persistentDataPath, "WorldShow/World_valea.png")))
                 + ConvertBoolToInt(!File.Exists(Path.Combine(Application.persistentDataPath, "WorldShow/World_aperta.png")))
                 + ConvertBoolToInt(!File.Exists(Path.Combine(Application.persistentDataPath, "WorldShow/World_gardenea.png")))
-                + ConvertBoolToInt(!File.Exists(Path.Combine(Application.persistentDataPath, "MenuData/MenuData.json")));
+                + ConvertBoolToInt(!File.Exists(Path.Combine(Application.persistentDataPath, "MenuData/MenuData.json")))
+
+                // My data to Download
+                +ConvertBoolToInt(!File.Exists(Path.Combine(Application.persistentDataPath, "LevelData/Level_mylevel.json")))
+                + ConvertBoolToInt(!File.Exists(Path.Combine(Application.persistentDataPath, "LevelData/Themes_mylevel.json")))
+                + ConvertBoolToInt(!File.Exists(Path.Combine(Application.persistentDataPath, "LevelData/Config_mylevel.json")))
+                + ConvertBoolToInt(!File.Exists(Path.Combine(Application.persistentDataPath, "LevelData/GeoBuffer_mylevel.json")));
+                // End My data to Download
             }
             if (downloadCoroutine == null) {
             downloadCoroutine = StartCoroutine(LoadData());
@@ -436,6 +453,23 @@ public class GameManager : MonoBehaviour
             hasFallen = true;
             //Debug.Log(transform.position.y);
             GameOver(realPercent, true);
+        }
+
+        // audio management
+        if (audioPlayer != null)
+        {
+            if (isInMainMenu)
+            {
+                audioPlayer.StopMusic();
+            }
+            else if (isGameOver || isGamePaused)
+            {
+                audioPlayer.PauseMusic();
+            }
+            else
+            {
+                audioPlayer.PlayMusic();
+            }
         }
     }
 
@@ -946,437 +980,202 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator LoadData()
     {
-        TextAsset route1 = Resources.Load<TextAsset>("LevelData/Level_valea");
-        TextAsset theme1 = Resources.Load<TextAsset>("LevelData/Themes_valea");
-        TextAsset theme2 = Resources.Load<TextAsset>("ThemeData/ThemeData");
-        TextAsset config1 = Resources.Load<TextAsset>("LevelData/Config_valea");
-        TextAsset geoBuffer1 = Resources.Load<TextAsset>("LevelData/GeoBuffer_valea");
-        TextAsset route2 = Resources.Load<TextAsset>("LevelData/Level_aperta");
-        TextAsset theme3 = Resources.Load<TextAsset>("LevelData/Themes_aperta");
-        TextAsset config2 = Resources.Load<TextAsset>("LevelData/Config_aperta");
-        TextAsset geoBuffer2 = Resources.Load<TextAsset>("LevelData/GeoBuffer_aperta");
-        TextAsset route3_1 = Resources.Load<TextAsset>("LevelData/Level_gardenea_older");
-        TextAsset theme4_1 = Resources.Load<TextAsset>("LevelData/Themes_gardenea_older");
-        TextAsset config3_1 = Resources.Load<TextAsset>("LevelData/Config_gardenea_older");
-        TextAsset geoBuffer3_1 = Resources.Load<TextAsset>("LevelData/GeoBuffer_gardenea_older");
-        TextAsset route3_2 = Resources.Load<TextAsset>("LevelData/Level_gardenea_old");
-        TextAsset theme4_2 = Resources.Load<TextAsset>("LevelData/Themes_gardenea_old");
-        TextAsset config3_2 = Resources.Load<TextAsset>("LevelData/Config_gardenea_old");
-        TextAsset geoBuffer3_2 = Resources.Load<TextAsset>("LevelData/GeoBuffer_gardenea_old");
-        TextAsset route3_3 = Resources.Load<TextAsset>("LevelData/Level_gardenea_new");
-        TextAsset theme4_3 = Resources.Load<TextAsset>("LevelData/Themes_gardenea_new");
-        TextAsset config3_3 = Resources.Load<TextAsset>("LevelData/Config_gardenea_new");
-        TextAsset geoBuffer3_3 = Resources.Load<TextAsset>("LevelData/GeoBuffer_gardenea_new");
-        if (!loadingPanel.activeSelf) {
-        loadingPanel.SetActive(true);
-        }
+        if (!loadingPanel.activeSelf) loadingPanel.SetActive(true);
         Image progressImage = loadingPanel.transform.GetChild(2).GetComponent<Image>();
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        if (!Directory.Exists(Path.Combine(Application.persistentDataPath, "LevelData"))) {
-        Directory.CreateDirectory(Path.Combine(Application.persistentDataPath, "LevelData"));
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
+
+        void UpdateProgress()
+        {
+            if (totalDownloadsRequired > 0)
+                progressImage.fillAmount = (float)downloadCount / (float)totalDownloadsRequired;
+            else
+                progressImage.fillAmount = 1f;
         }
-        if (!Directory.Exists(Path.Combine(Application.persistentDataPath, "ThemeData"))) {
-        Directory.CreateDirectory(Path.Combine(Application.persistentDataPath, "ThemeData"));
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
+
+        string[] folders = { "LevelData", "ThemeData", "Backgrounds", "Music", "WorldShow", "MenuData" };
+        foreach (string folder in folders)
+        {
+            string path = Path.Combine(Application.persistentDataPath, folder);
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+                downloadCount++;
+                UpdateProgress();
+                yield return null;
+            }
         }
-        if (!Directory.Exists(Path.Combine(Application.persistentDataPath, "Backgrounds"))) {
-        Directory.CreateDirectory(Path.Combine(Application.persistentDataPath, "Backgrounds"));
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
+
+        // MY LEVEL 
+        if (EnsureFile("LevelData/Config_mylevel", "LevelData/Config_mylevel.json")) downloadCount++;
+        if (EnsureFile("LevelData/Level_mylevel", "LevelData/Level_mylevel.json")) downloadCount++;
+        if (EnsureFile("LevelData/Themes_mylevel", "LevelData/Themes_mylevel.json")) downloadCount++;
+        if (EnsureFile("LevelData/GeoBuffer_mylevel", "LevelData/GeoBuffer_mylevel.json")) downloadCount++;
+
+        // VALEA
+        if (EnsureFile("LevelData/Level_valea", "LevelData/Level_valea.json")) { downloadCount++; UpdateProgress(); yield return null; }
+        if (EnsureFile("LevelData/Themes_valea", "LevelData/Themes_valea.json")) { downloadCount++; }
+        if (EnsureFile("LevelData/Config_valea", "LevelData/Config_valea.json")) { downloadCount++; }
+        if (EnsureFile("LevelData/GeoBuffer_valea", "LevelData/GeoBuffer_valea.json")) { downloadCount++; }
+
+        // APERTA
+        if (EnsureFile("LevelData/Level_aperta", "LevelData/Level_aperta.json")) { downloadCount++; UpdateProgress(); yield return null; }
+        if (EnsureFile("LevelData/Themes_aperta", "LevelData/Themes_aperta.json")) { downloadCount++; }
+        if (EnsureFile("LevelData/Config_aperta", "LevelData/Config_aperta.json")) { downloadCount++; }
+        if (EnsureFile("LevelData/GeoBuffer_aperta", "LevelData/GeoBuffer_aperta.json")) { downloadCount++; }
+
+        // GARDENEA 
+        string[] gardeneaVars = { "older", "old", "new" };
+        foreach (var v in gardeneaVars)
+        {
+            if (EnsureFile($"LevelData/Level_gardenea_{v}", $"LevelData/Level_gardenea_{v}.json")) downloadCount++;
+            if (EnsureFile($"LevelData/Themes_gardenea_{v}", $"LevelData/Themes_gardenea_{v}.json")) downloadCount++;
+            if (EnsureFile($"LevelData/Config_gardenea_{v}", $"LevelData/Config_gardenea_{v}.json")) downloadCount++;
+            if (EnsureFile($"LevelData/GeoBuffer_gardenea_{v}", $"LevelData/GeoBuffer_gardenea_{v}.json")) downloadCount++;
         }
-        if (!Directory.Exists(Path.Combine(Application.persistentDataPath, "Music"))) {
-        Directory.CreateDirectory(Path.Combine(Application.persistentDataPath, "Music"));
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
+        UpdateProgress(); yield return null;
+
+        // THEME DATA
+        if (EnsureFile("ThemeData/ThemeData", "ThemeData/ThemeData.json")) { downloadCount++; UpdateProgress(); yield return null; }
+
+        // BACKGROUNDS & ENEMIES & GENERAL (1-6)
+        for (int i = 1; i <= 6; i++)
+        {
+            if (EnsureBinaryFile($"Backgrounds/Background{i}", $"Backgrounds/Background{i}.png", "png")) downloadCount++;
+            if (EnsureBinaryFile($"Enemy{i}", $"Enemy{i}.png", "png")) downloadCount++;
+            if (EnsureBinaryFile($"General{i}", $"General{i}.png", "png")) downloadCount++;
         }
-        if (!Directory.Exists(Path.Combine(Application.persistentDataPath, "WorldShow"))) {
-        Directory.CreateDirectory(Path.Combine(Application.persistentDataPath, "WorldShow"));
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
+        UpdateProgress(); yield return null;
+
+        // MUSIC (1-3 + MyLevel)
+        if (EnsureBinaryFile("Music/Music1", "Music/Music1.mp3", "mp3")) downloadCount++;
+        if (EnsureBinaryFile("Music/Music2", "Music/Music2.mp3", "mp3")) downloadCount++;
+        if (EnsureBinaryFile("Music/Music3", "Music/Music3.mp3", "mp3")) downloadCount++;
+
+        // WORLD SHOW
+        if (EnsureBinaryFile("WorldShow/World_valea", "WorldShow/World_valea.png", "png")) downloadCount++;
+        if (EnsureBinaryFile("WorldShow/World_aperta", "WorldShow/World_aperta.png", "png")) downloadCount++;
+        if (EnsureBinaryFile("WorldShow/World_gardenea", "WorldShow/World_gardenea.png", "png")) downloadCount++;
+        if (EnsureBinaryFile("WorldShow/World_mylevel", "WorldShow/World_mylevel.png", "png")) downloadCount++;
+
+        string menuJson = Resources.Load<TextAsset>("MenuData/MenuData").text;
+        string menuPath = Path.Combine(Application.persistentDataPath, "MenuData/MenuData.json");
+
+        File.WriteAllText(menuPath, menuJson);
+
+        UpdateProgress();
         yield return null;
-        }
-        if (!Directory.Exists(Path.Combine(Application.persistentDataPath, "MenuData"))) {
-        Directory.CreateDirectory(Path.Combine(Application.persistentDataPath, "MenuData"));
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "LevelData/Level_valea.json"))) {
-        StreamWriter routeWriter = new StreamWriter(Path.Combine(Application.persistentDataPath, "LevelData/Level_valea.json"));
-        routeWriter.Write(route1.text);
-        routeWriter.Close();
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "LevelData/Themes_valea.json"))) {
-        StreamWriter themeWriter = new StreamWriter(Path.Combine(Application.persistentDataPath, "LevelData/Themes_valea.json"));
-        themeWriter.Write(theme1.text);
-        themeWriter.Close();
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "ThemeData/ThemeData.json"))) {
-        StreamWriter theme2Writer = new StreamWriter(Path.Combine(Application.persistentDataPath, "ThemeData/ThemeData.json"));
-        theme2Writer.Write(theme2.text);
-        theme2Writer.Close();
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "LevelData/Config_valea.json"))) {
-        StreamWriter configWriter = new StreamWriter(Path.Combine(Application.persistentDataPath, "LevelData/Config_valea.json"));
-        configWriter.Write(config1.text);
-        configWriter.Close();
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "LevelData/GeoBuffer_valea.json"))) {
-        StreamWriter geoBufferWriter = new StreamWriter(Path.Combine(Application.persistentDataPath, "LevelData/GeoBuffer_valea.json"));
-        geoBufferWriter.Write(geoBuffer1.text);
-        geoBufferWriter.Close();
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "LevelData/Level_aperta.json"))) {
-        StreamWriter routeWriter2 = new StreamWriter(Path.Combine(Application.persistentDataPath, "LevelData/Level_aperta.json"));
-        routeWriter2.Write(route2.text);
-        routeWriter2.Close();
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "LevelData/Themes_aperta.json"))) {
-        StreamWriter themeWriter2 = new StreamWriter(Path.Combine(Application.persistentDataPath, "LevelData/Themes_aperta.json"));
-        themeWriter2.Write(theme3.text);
-        themeWriter2.Close();
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "LevelData/Config_aperta.json"))) {
-        StreamWriter configWriter2 = new StreamWriter(Path.Combine(Application.persistentDataPath, "LevelData/Config_aperta.json"));
-        configWriter2.Write(config2.text);
-        configWriter2.Close();
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "LevelData/GeoBuffer_aperta.json"))) {
-        StreamWriter geoBufferWriter2 = new StreamWriter(Path.Combine(Application.persistentDataPath, "LevelData/GeoBuffer_aperta.json"));
-        geoBufferWriter2.Write(geoBuffer2.text);
-        geoBufferWriter2.Close();
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "LevelData/Level_gardenea_older.json"))) {
-        StreamWriter routeWriter3_1 = new StreamWriter(Path.Combine(Application.persistentDataPath, "LevelData/Level_gardenea_older.json"));
-        routeWriter3_1.Write(route3_1.text);
-        routeWriter3_1.Close();
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "LevelData/Themes_gardenea_older.json"))) {
-        StreamWriter themeWriter3_1 = new StreamWriter(Path.Combine(Application.persistentDataPath, "LevelData/Themes_gardenea_older.json"));
-        themeWriter3_1.Write(theme4_1.text);
-        themeWriter3_1.Close();
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "LevelData/Config_gardenea_older.json"))) {
-        StreamWriter configWriter3_1 = new StreamWriter(Path.Combine(Application.persistentDataPath, "LevelData/Config_gardenea_older.json"));
-        configWriter3_1.Write(config3_1.text);
-        configWriter3_1.Close();
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "LevelData/GeoBuffer_gardenea_older.json"))) {
-        StreamWriter geoBufferWriter3_1 = new StreamWriter(Path.Combine(Application.persistentDataPath, "LevelData/GeoBuffer_gardenea_older.json"));
-        geoBufferWriter3_1.Write(geoBuffer3_1.text);
-        geoBufferWriter3_1.Close();
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "LevelData/Level_gardenea_old.json"))) {
-        StreamWriter routeWriter3_2 = new StreamWriter(Path.Combine(Application.persistentDataPath, "LevelData/Level_gardenea_old.json"));
-        routeWriter3_2.Write(route3_2.text);
-        routeWriter3_2.Close();
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "LevelData/Themes_gardenea_old.json"))) {
-        StreamWriter themeWriter3_2 = new StreamWriter(Path.Combine(Application.persistentDataPath, "LevelData/Themes_gardenea_old.json"));
-        themeWriter3_2.Write(theme4_2.text);
-        themeWriter3_2.Close();
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "LevelData/Config_gardenea_old.json"))) {
-        StreamWriter configWriter3_2 = new StreamWriter(Path.Combine(Application.persistentDataPath, "LevelData/Config_gardenea_old.json"));
-        configWriter3_2.Write(config3_2.text);
-        configWriter3_2.Close();
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "LevelData/GeoBuffer_gardenea_old.json"))) {
-        StreamWriter geoBufferWriter3_2 = new StreamWriter(Path.Combine(Application.persistentDataPath, "LevelData/GeoBuffer_gardenea_old.json"));
-        geoBufferWriter3_2.Write(geoBuffer3_2.text);
-        geoBufferWriter3_2.Close();
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "LevelData/Level_gardenea_new.json"))) {
-        StreamWriter routeWriter3_3 = new StreamWriter(Path.Combine(Application.persistentDataPath, "LevelData/Level_gardenea_new.json"));
-        routeWriter3_3.Write(route3_3.text);
-        routeWriter3_3.Close();
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "LevelData/Themes_gardenea_new.json"))) {
-        StreamWriter themeWriter3_3 = new StreamWriter(Path.Combine(Application.persistentDataPath, "LevelData/Themes_gardenea_new.json"));
-        themeWriter3_3.Write(theme4_3.text);
-        themeWriter3_3.Close();
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "LevelData/Config_gardenea_new.json"))) {
-        StreamWriter configWriter3_3 = new StreamWriter(Path.Combine(Application.persistentDataPath, "LevelData/Config_gardenea_new.json"));
-        configWriter3_3.Write(config3_3.text);
-        configWriter3_3.Close();
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "LevelData/GeoBuffer_gardenea_new.json"))) {
-        StreamWriter geoBufferWriter3_3 = new StreamWriter(Path.Combine(Application.persistentDataPath, "LevelData/GeoBuffer_gardenea_new.json"));
-        geoBufferWriter3_3.Write(geoBuffer3_3.text);
-        geoBufferWriter3_3.Close();
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "Backgrounds/Background1.png"))) {
-        Texture2D background1 = Resources.Load<Texture2D>("Backgrounds/Background1");
-        byte[] data = background1.EncodeToPNG();
-        File.WriteAllBytes(Path.Combine(Application.persistentDataPath, "Backgrounds/Background1.png"), data);
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "Enemy1.png"))) {
-        Texture2D enemy1 = Resources.Load<Texture2D>("Enemy1");
-        byte[] enemyData = enemy1.EncodeToPNG();
-        File.WriteAllBytes(Path.Combine(Application.persistentDataPath, "Enemy1.png"), enemyData);
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "General1.png"))) {
-        Texture2D general1 = Resources.Load<Texture2D>("General1");
-        byte[] generalData = general1.EncodeToPNG();
-        File.WriteAllBytes(Path.Combine(Application.persistentDataPath, "General1.png"), generalData);
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "Backgrounds/Background2.png"))) {
-        Texture2D background2 = Resources.Load<Texture2D>("Backgrounds/Background2");
-        byte[] data2 = background2.EncodeToPNG();
-        File.WriteAllBytes(Path.Combine(Application.persistentDataPath, "Backgrounds/Background2.png"), data2);
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "Enemy2.png"))) {
-        Texture2D enemy2 = Resources.Load<Texture2D>("Enemy2");
-        byte[] enemyData2 = enemy2.EncodeToPNG();
-        File.WriteAllBytes(Path.Combine(Application.persistentDataPath, "Enemy2.png"), enemyData2);
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "General2.png"))) {
-        Texture2D general2 = Resources.Load<Texture2D>("General2");
-        byte[] generalData2 = general2.EncodeToPNG();
-        File.WriteAllBytes(Path.Combine(Application.persistentDataPath, "General2.png"), generalData2);
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "Backgrounds/Background3.png"))) {
-        Texture2D background3 = Resources.Load<Texture2D>("Backgrounds/Background3");
-        byte[] data3 = background3.EncodeToPNG();
-        File.WriteAllBytes(Path.Combine(Application.persistentDataPath, "Backgrounds/Background3.png"), data3);
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "Enemy3.png"))) {
-        Texture2D enemy3 = Resources.Load<Texture2D>("Enemy3");
-        byte[] enemyData3 = enemy3.EncodeToPNG();
-        File.WriteAllBytes(Path.Combine(Application.persistentDataPath, "Enemy3.png"), enemyData3);
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "General3.png"))) {
-        Texture2D general3 = Resources.Load<Texture2D>("General3");
-        byte[] generalData3 = general3.EncodeToPNG();
-        File.WriteAllBytes(Path.Combine(Application.persistentDataPath, "General3.png"), generalData3);
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "Backgrounds/Background4.png"))) {
-        Texture2D background4 = Resources.Load<Texture2D>("Backgrounds/Background4");
-        byte[] data4 = background4.EncodeToPNG();
-        File.WriteAllBytes(Path.Combine(Application.persistentDataPath, "Backgrounds/Background4.png"), data4);
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "Enemy4.png"))) {
-        Texture2D enemy4 = Resources.Load<Texture2D>("Enemy4");
-        byte[] enemyData4 = enemy4.EncodeToPNG();
-        File.WriteAllBytes(Path.Combine(Application.persistentDataPath, "Enemy4.png"), enemyData4);
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "General4.png"))) {
-        Texture2D general4 = Resources.Load<Texture2D>("General4");
-        byte[] generalData4 = general4.EncodeToPNG();
-        File.WriteAllBytes(Path.Combine(Application.persistentDataPath, "General4.png"), generalData4);
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "Backgrounds/Background5.png"))) {
-        Texture2D background5 = Resources.Load<Texture2D>("Backgrounds/Background5");
-        byte[] data5 = background5.EncodeToPNG();
-        File.WriteAllBytes(Path.Combine(Application.persistentDataPath, "Backgrounds/Background5.png"), data5);
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "Enemy5.png"))) {
-        Texture2D enemy5 = Resources.Load<Texture2D>("Enemy5");
-        byte[] enemyData5 = enemy5.EncodeToPNG();
-        File.WriteAllBytes(Path.Combine(Application.persistentDataPath, "Enemy5.png"), enemyData5);
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "General5.png"))) {
-        Texture2D general5 = Resources.Load<Texture2D>("General5");
-        byte[] generalData5 = general5.EncodeToPNG();
-        File.WriteAllBytes(Path.Combine(Application.persistentDataPath, "General5.png"), generalData5);
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "Backgrounds/Background6.png"))) {
-        Texture2D background6 = Resources.Load<Texture2D>("Backgrounds/Background6");
-        byte[] data6 = background6.EncodeToPNG();
-        File.WriteAllBytes(Path.Combine(Application.persistentDataPath, "Backgrounds/Background6.png"), data6);
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "Enemy6.png"))) {
-        Texture2D enemy6 = Resources.Load<Texture2D>("Enemy6");
-        byte[] enemyData6 = enemy6.EncodeToPNG();
-        File.WriteAllBytes(Path.Combine(Application.persistentDataPath, "Enemy6.png"), enemyData6);
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "General6.png"))) {
-        Texture2D general6 = Resources.Load<Texture2D>("General6");
-        byte[] generalData6 = general6.EncodeToPNG();
-        File.WriteAllBytes(Path.Combine(Application.persistentDataPath, "General6.png"), generalData6);
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "Music/Music1.mp3"))) {
-        AudioClip music1 = Resources.Load<AudioClip>("Music/Music1");
-        byte[] mp3 = WavToMp3.ConvertWavToMp3(music1, 128);
-        File.WriteAllBytes(Path.Combine(Application.persistentDataPath, "Music/Music1.mp3"), mp3);
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "Music/Music2.mp3"))) {
-        AudioClip music2 = Resources.Load<AudioClip>("Music/Music2");
-        byte[] mp32 = WavToMp3.ConvertWavToMp3(music2, 128);
-        File.WriteAllBytes(Path.Combine(Application.persistentDataPath, "Music/Music2.mp3"), mp32);
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "Music/Music3.mp3"))) {
-        AudioClip music3 = Resources.Load<AudioClip>("Music/Music3");
-        byte[] mp33 = WavToMp3.ConvertWavToMp3(music3, 128);
-        File.WriteAllBytes(Path.Combine(Application.persistentDataPath, "Music/Music3.mp3"), mp33);
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "WorldShow/World_valea.png"))) {
-        Texture2D worldShow1 = Resources.Load<Texture2D>("WorldShow/World_valea");
-        byte[] worldShowData = worldShow1.EncodeToPNG();
-        File.WriteAllBytes(Path.Combine(Application.persistentDataPath, "WorldShow/World_valea.png"), worldShowData);
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "WorldShow/World_aperta.png"))) {
-        Texture2D worldShow2 = Resources.Load<Texture2D>("WorldShow/World_aperta");
-        byte[] worldShowData2 = worldShow2.EncodeToPNG();
-        File.WriteAllBytes(Path.Combine(Application.persistentDataPath, "WorldShow/World_aperta.png"), worldShowData2);
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "WorldShow/World_gardenea.png"))) {
-        Texture2D worldShow3 = Resources.Load<Texture2D>("WorldShow/World_gardenea");
-        byte[] worldShowData3 = worldShow3.EncodeToPNG();
-        File.WriteAllBytes(Path.Combine(Application.persistentDataPath, "WorldShow/World_gardenea.png"), worldShowData3);
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
-        if (!File.Exists(Path.Combine(Application.persistentDataPath, "MenuData/MenuData.json"))) {
-        string menuDataJson = Resources.Load<TextAsset>("MenuData/MenuData").text;
-        File.WriteAllText(Path.Combine(Application.persistentDataPath, "MenuData/MenuData.json"), menuDataJson);
-        downloadCount++;
-        progressImage.fillAmount = downloadCount / totalDownloadsRequired;
-        yield return null;
-        }
+
         isDataDownloaded = true;
         loadingPanel.SetActive(false);
-        yield return null;
     }
+
+    /// <summary>
+    /// Copy file tu Resources ra PersistentDataPath 
+    /// Ham EnsureFile va EnsureBinaryFile giup rut gon ham LoadData lap di lap lai phan !File.Exists(destPath)
+    /// </summary>
+    /// <param name="resourcePath"></param>
+    /// <param name="destRelativePath"></param>
+    /// <param name="isBinary"></param>
+    /// <returns></returns>
+    private bool EnsureFile(string resourcePath, string destRelativePath, bool isBinary = false)
+    {
+        string destPath = Path.Combine(Application.persistentDataPath, destRelativePath);
+
+        string dir = Path.GetDirectoryName(destPath);
+        if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+
+        if (!File.Exists(destPath))
+        {
+            if (isBinary)
+            {
+                return false;
+            }
+            else
+            {
+                TextAsset asset = Resources.Load<TextAsset>(resourcePath);
+                if (asset != null)
+                {
+                    File.WriteAllText(destPath, asset.text);
+                    return true;
+                }
+                else
+                {
+                    Debug.LogError($"[LoadData] Resource not found: {resourcePath}");
+                }
+            }
+        }
+        return false;
+    }
+
+    private bool EnsureBinaryFile(string resourcePath, string destRelativePath, string type)
+    {
+        string destPath = Path.Combine(Application.persistentDataPath, destRelativePath);
+        string dir = Path.GetDirectoryName(destPath);
+        if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+
+        if (!File.Exists(destPath))
+        {
+            if (type == "png")
+            {
+                Texture2D tex = Resources.Load<Texture2D>(resourcePath);
+                if (tex != null)
+                {
+                    File.WriteAllBytes(destPath, tex.EncodeToPNG());
+                    return true;
+                }
+            }
+            else if (type == "mp3")
+            {
+                AudioClip clip = Resources.Load<AudioClip>(resourcePath);
+                if (clip != null)
+                {
+                    byte[] mp3Data = WavToMp3.ConvertWavToMp3(clip, 128);
+                    File.WriteAllBytes(destPath, mp3Data);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void EnsureFileExists(string resourcePath, string destFileName)
+    {
+        string destPath = Path.Combine(Application.persistentDataPath, destFileName);
+
+        if (!File.Exists(destPath))
+        {
+            TextAsset asset = Resources.Load<TextAsset>(resourcePath);
+            if (asset != null)
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(destPath));
+                File.WriteAllText(destPath, asset.text);
+                Debug.Log($"file copied: {destFileName}");
+            }
+            else
+            {
+                Debug.LogError($"ERROR: can't find file '{resourcePath}' in Resources!");
+            }
+        }
+    }
+    //public void GenerateMyLongLevel()
+    //{
+    //    int targetSeconds = 120;
+    //    float speed = 8.0f;
+    //    int totalRows = (int)(targetSeconds * speed);
+
+    //    NewLevelJson newLevel = new NewLevelJson();
+
+    //    for (int i = 0; i < totalRows; i++)
+    //    {
+    //        newLevel.tiles.Add(new List<int> { 1, 1, 1, 1, 1 });
+
+    //        newLevel.enemies.Add(new List<int> { 0, 0, 0, 0, 0 });
+    //    }
+
+    //    string json = JsonConvert.SerializeObject(newLevel, Formatting.Indented);
+
+    //    string path = Path.Combine(Application.persistentDataPath, "LevelData/Level_mylevel.json");
+
+    //    File.WriteAllText(path, json);
+    //    Debug.Log($"da tao xong level dai {totalRows} tai: {path}");
+    //}
 }

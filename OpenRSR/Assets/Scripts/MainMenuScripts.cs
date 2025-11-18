@@ -118,6 +118,10 @@ public class MainMenuScripts : MonoBehaviour
     public static MainMenuScripts instance;
     public bool isInitialized = false;
     private ScriptLoader scriptLoader;
+
+    // My code convenience
+    private int CurrentListIndex => -menuIdx;
+    private bool isAnimating = false;
     // Start is called before the first frame update
     void Awake() {
         instance = this;
@@ -338,16 +342,30 @@ public class MainMenuScripts : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (gameManager != null) {
-            if (gameManager.isInMainMenu) {
+        if (gameManager != null)
+        {
+            if (gameManager.isInMainMenu)
+            {
                 DetectClick();
-            } else {
-                if (isMovingCamera && isInTitleScreen) {
+                if (!isAnimating)
+                {
+                    if (isMovingLeft)
+                    {
+                        MoveMenuLeft();
+                        isMovingLeft = false;
+                    }
+                    else if (isMovingRight)
+                    {
+                        MoveMenuRight();
+                        isMovingRight = false;
+                    }
+                }
+            }
+            else
+            {
+                if (isMovingCamera && isInTitleScreen)
+                {
                     MoveCamera(new Vector3(5f, 2.25f, -2f));
-                } else if (isMovingLeft) {
-                    MoveMenuLeft();
-                } else if (isMovingRight) {
-                    MoveMenuRight();
                 }
             }
         }
@@ -363,14 +381,13 @@ public class MainMenuScripts : MonoBehaviour
             if (Physics.Raycast(ray, out hit))
             {
                 GameObject gameManagerObject = GameObject.Find("GameManager");
-                if (hit.transform == gameManagerObject.transform || hit.transform == this.transform)
+                if (hit.transform != null && (hit.transform == gameManagerObject.transform || hit.transform == this.transform))
                 {
-                    // Add your code here to handle the click event
                     gameManager.SetIsInMainMenu(false);
                     isMovingCamera = true;
-                    titleText.SetActive(false);
-                    leftButton.SetActive(true);
-                    rightButton.SetActive(true);
+                    if (titleText) titleText.SetActive(false);
+                    if (leftButton) leftButton.SetActive(true);
+                    if (rightButton) rightButton.SetActive(true);
                 }
             }
         }
@@ -406,162 +423,170 @@ public class MainMenuScripts : MonoBehaviour
             }
         }
     }
-    public void MoveMenuRight() {
-        if (!isMovingRight) isMovingRight = true;
-        levelUIComponent.transform.localPosition = Vector3.Lerp(new Vector3(800f * (float)(menuIdx), 0f, 0f), new Vector3(800f * (float)(menuIdx - 1), 0f, 0f), t);
-        t += 0.02f;
-        if (t >= 0.98f) { 
-            levelUIComponent.transform.localPosition = new Vector3(800f * (float)(menuIdx - 1), 0f, 0f);
+
+    /// <summary>
+    /// Thay doi ham MoveMenuRight/Left va rut gon bang ham AnimateMenuMove
+    /// </summary>
+    public void MoveMenuRight()
+    {
+        if (isAnimating) return;
+
+        isAnimating = true;
+
+        StartCoroutine(AnimateMenuMove(menuIdx, menuIdx - 1, () => {
             menuIdx--;
-            if (-menuIdx < menuData.level_list.Count) {
-                currentLevelId = menuData.level_list[-menuIdx].level_id;
-                currentVariation = menuData.level_list[-menuIdx].default_variation;
-            }
-            try {
-                gameManager.themeChanger2.UpdateTheme(menuData.level_list[-menuIdx].display_background[currentVariation]);
-            } catch (System.Exception e) {
-                gameManager.themeChanger2.UpdateTheme(0);
-            }
-            t = 0f;
-            isMovingRight = false;
-        }
+            UpdateCurrentLevelInfo();
+            isAnimating = false;
+        }));
     }
 
-    public void MoveMenuLeft() {
-        if (!isMovingLeft) isMovingLeft = true;
-        levelUIComponent.transform.localPosition = Vector3.Lerp(new Vector3(800f * (float)(menuIdx), 0f, 0f), new Vector3(800f * (float)(menuIdx + 1), 0f, 0f), t);
-        t += 0.02f;
-        if (t >= 0.98f) {
-            levelUIComponent.transform.localPosition = new Vector3(800f * (float)(menuIdx + 1), 0f, 0f);
+    public void MoveMenuLeft()
+    {
+        if (isAnimating) return;
+
+        isAnimating = true;
+
+        StartCoroutine(AnimateMenuMove(menuIdx, menuIdx + 1, () => {
             menuIdx++;
-            if (-menuIdx >= 0) {
-                currentLevelId = menuData.level_list[-menuIdx].level_id;
-                currentVariation = menuData.level_list[-menuIdx].default_variation;
+            UpdateCurrentLevelInfo();
+            isAnimating = false;
+        }));
+    }
+
+    private IEnumerator AnimateMenuMove(int startIdx, int endIdx, System.Action onComplete)
+    {
+        float timer = 0f;
+        Vector3 startPos = new Vector3(800f * (float)startIdx, 0f, 0f);
+        Vector3 endPos = new Vector3(800f * (float)endIdx, 0f, 0f);
+
+        while (timer < 1f)
+        {
+            timer += 0.04f;
+            levelUIComponent.transform.localPosition = Vector3.Lerp(startPos, endPos, timer);
+            yield return null;
+        }
+
+        levelUIComponent.transform.localPosition = endPos;
+        onComplete?.Invoke();
+    }
+
+    /// <summary>
+    /// Thay doi ham UpdateCurrentLevelInfo, Next/PreviousVariation va rut gon bang ham UpdateVariationUI
+    /// </summary>
+    private void UpdateCurrentLevelInfo()
+    {
+        int listIndex = -menuIdx;
+
+        if (listIndex >= 0 && listIndex < menuData.level_list.Count)
+        {
+            var currentLevelData = menuData.level_list[listIndex];
+
+            currentLevelId = currentLevelData.level_id;
+            currentVariation = currentLevelData.default_variation;
+
+            try
+            {
+                if (gameManager != null && gameManager.themeChanger2 != null)
+                {
+                    if (currentLevelData.display_background.ContainsKey(currentVariation))
+                    {
+                        gameManager.themeChanger2.UpdateTheme(currentLevelData.display_background[currentVariation]);
+                    }
+                    else
+                    {
+                        gameManager.themeChanger2.UpdateTheme(0);
+                    }
+                }
             }
-            try {
-                gameManager.themeChanger2.UpdateTheme(menuData.level_list[-menuIdx].display_background[currentVariation]);
-            } catch (System.Exception e) {
+            catch (System.Exception e)
+            {
+                Debug.LogError("Error Update theme: " + e.Message);
+            }
+        }
+        else
+        {
+            if (gameManager != null && gameManager.themeChanger2 != null)
+            {
                 gameManager.themeChanger2.UpdateTheme(0);
             }
-            t = 0f;
-            isMovingLeft = false;
         }
     }
 
-    public void NextVariation() {
-        try {
+    public void NextVariation()
+    {
+        int listIndex = -menuIdx;
+        if (listIndex < 0 || listIndex >= menuData.level_list.Count) return;
+
+        try
+        {
+            MenuLevelJsonWithVariations level = menuData.level_list[listIndex];
+
             currentVariationIdx++;
-            currentVariation = menuData.level_list[-menuIdx].level_variations[currentVariationIdx];
-            MenuLevelJsonWithVariations level = menuData.level_list[-menuIdx];
-            GameObject levelCoverObject = GameObject.Find($"Level_{level.level_id}_Cover_Button");
-            levelCoverObject.GetComponent<Button>().onClick.RemoveAllListeners();
-            levelCoverObject.GetComponent<Button>().onClick.AddListener(() => {
-                if (currentVariation == "default") {
-                    gameManager.LoadLevel(level.level_id);
-                } else {
-                    gameManager.LoadLevel(level.level_id + "_" + currentVariation);
-                }
-                mainMenuCanvas.SetActive(false);
-            });
-            GameObject levelTitleObject = GameObject.Find($"Level_{level.level_id}_Title");
-            levelTitleObject.GetComponent<TextMeshProUGUI>().text = level.display_title[currentVariation];
-            GameObject levelPercentObject = GameObject.Find($"Level_{level.level_id}_Percent");
-            levelPercentObject.GetComponent<TextMeshProUGUI>().text = "0%";
-            GameObject levelGemCountObject = GameObject.Find($"Level_{level.level_id}_Gems");
-            levelGemCountObject.GetComponent<TextMeshProUGUI>().text = $"0/{level.display_gems[currentVariation].ToString()}";
-            GameObject levelCrownsObject = GameObject.Find($"Level_{level.level_id}_Crowns");
-            switch (level.display_crowns[currentVariation]) {
-                case 1:
-                    GameObject oneCrownObject = levelCrownsObject.transform.GetChild(0).gameObject;
-                    oneCrownObject.SetActive(true);
-                    break;
-                case 2:
-                    GameObject twoCrownsObject = levelCrownsObject.transform.GetChild(1).gameObject;
-                    twoCrownsObject.SetActive(true);
-                    break;
-                case 3:
-                    GameObject threeCrownsObject = levelCrownsObject.transform.GetChild(2).gameObject;
-                    threeCrownsObject.SetActive(true);
-                    break;
-                default:
-                    GameObject oneCrownObject2 = levelCrownsObject.transform.GetChild(0).gameObject;
-                    GameObject twoCrownsObject2 = levelCrownsObject.transform.GetChild(1).gameObject;
-                    GameObject threeCrownsObject2 = levelCrownsObject.transform.GetChild(2).gameObject;
-                    oneCrownObject2.SetActive(false);
-                    twoCrownsObject2.SetActive(false);
-                    threeCrownsObject2.SetActive(false);
-                    break;
-            }
-            GameObject levelVariationsObject = GameObject.Find($"Level_{level.level_id}_Variations");
-            if (level.level_variations.Count <= 1) {
-                levelVariationsObject.SetActive(false);
-            } else {
-                TextMeshProUGUI variationName = levelVariationsObject.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>();
-                TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
-                variationName.text = textInfo.ToTitleCase(level.level_variations[currentVariationIdx]);
-            }
-            gameManager.themeChanger2.UpdateTheme(menuData.level_list[-menuIdx].display_background[currentVariation]);
-        } catch (System.Exception e) {
-            Debug.LogError(e);
+            if (currentVariationIdx >= level.level_variations.Count) currentVariationIdx = 0;
+
+            UpdateVariationUI(level);
+
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError("NextVariation Error: " + e.Message);
         }
     }
 
-    public void PreviousVariation() {
-        try {
+    public void PreviousVariation()
+    {
+        int listIndex = -menuIdx;
+        if (listIndex < 0 || listIndex >= menuData.level_list.Count) return;
+
+        try
+        {
+            MenuLevelJsonWithVariations level = menuData.level_list[listIndex];
+
             currentVariationIdx--;
-            currentVariation = menuData.level_list[-menuIdx].level_variations[currentVariationIdx];
-            //Debug.Log(currentVariation);
-            MenuLevelJsonWithVariations level = menuData.level_list[-menuIdx];
-            GameObject levelCoverObject = GameObject.Find($"Level_{level.level_id}_Cover_Button");
-            levelCoverObject.GetComponent<Button>().onClick.RemoveAllListeners();
-            levelCoverObject.GetComponent<Button>().onClick.AddListener(() => {
-                if (currentVariation == "default") {
-                    gameManager.LoadLevel(level.level_id);
-                } else {
-                    gameManager.LoadLevel(level.level_id + "_" + currentVariation);
-                }
+            if (currentVariationIdx < 0) currentVariationIdx = level.level_variations.Count - 1;
+
+            UpdateVariationUI(level);
+
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError("PreviousVariation Error: " + e.Message);
+        }
+    }
+
+    private void UpdateVariationUI(MenuLevelJsonWithVariations level)
+    {
+        currentVariation = level.level_variations[currentVariationIdx];
+
+        GameObject levelCoverObject = GameObject.Find($"Level_{level.level_id}_Cover_Button");
+        if (levelCoverObject != null)
+        {
+            Button btn = levelCoverObject.GetComponent<Button>();
+            btn.onClick.RemoveAllListeners();
+            btn.onClick.AddListener(() => {
+                string levelToLoad = (currentVariation == "default") ? level.level_id : level.level_id + "_" + currentVariation;
+                gameManager.LoadLevel(levelToLoad);
                 mainMenuCanvas.SetActive(false);
             });
-            GameObject levelTitleObject = GameObject.Find($"Level_{level.level_id}_Title");
-            levelTitleObject.GetComponent<TextMeshProUGUI>().text = level.display_title[currentVariation];
-            GameObject levelPercentObject = GameObject.Find($"Level_{level.level_id}_Percent");
-            levelPercentObject.GetComponent<TextMeshProUGUI>().text = "0%";
-            GameObject levelGemCountObject = GameObject.Find($"Level_{level.level_id}_Gems");
-            levelGemCountObject.GetComponent<TextMeshProUGUI>().text = $"0/{level.display_gems[currentVariation].ToString()}";
-            GameObject levelCrownsObject = GameObject.Find($"Level_{level.level_id}_Crowns");
-            switch (level.display_crowns[currentVariation]) {
-                case 1:
-                    GameObject oneCrownObject = levelCrownsObject.transform.GetChild(0).gameObject;
-                    oneCrownObject.SetActive(true);
-                    break;
-                case 2:
-                    GameObject twoCrownsObject = levelCrownsObject.transform.GetChild(1).gameObject;
-                    twoCrownsObject.SetActive(true);
-                    break;
-                case 3:
-                    GameObject threeCrownsObject = levelCrownsObject.transform.GetChild(2).gameObject;
-                    threeCrownsObject.SetActive(true);
-                    break;
-                default:
-                    GameObject oneCrownObject2 = levelCrownsObject.transform.GetChild(0).gameObject;
-                    GameObject twoCrownsObject2 = levelCrownsObject.transform.GetChild(1).gameObject;
-                    GameObject threeCrownsObject2 = levelCrownsObject.transform.GetChild(2).gameObject;
-                    oneCrownObject2.SetActive(false);
-                    twoCrownsObject2.SetActive(false);
-                    threeCrownsObject2.SetActive(false);
-                    break;
-            }
-            GameObject levelVariationsObject = GameObject.Find($"Level_{level.level_id}_Variations");
-            if (level.level_variations.Count <= 1) {
-                levelVariationsObject.SetActive(false);
-            } else {
-                TextMeshProUGUI variationName = levelVariationsObject.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>();
-                TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
-                variationName.text = textInfo.ToTitleCase(level.level_variations[currentVariationIdx]);
-            }
-            gameManager.themeChanger2.UpdateTheme(menuData.level_list[-menuIdx].display_background[currentVariation]);
-        } catch (System.Exception e) {
-            Debug.LogError(e);
+        }
+
+        GameObject levelTitleObject = GameObject.Find($"Level_{level.level_id}_Title");
+        if (levelTitleObject) levelTitleObject.GetComponent<TextMeshProUGUI>().text = level.display_title.ContainsKey(currentVariation) ? level.display_title[currentVariation] : "Unknown";
+
+        GameObject levelGemCountObject = GameObject.Find($"Level_{level.level_id}_Gems");
+        if (levelGemCountObject) levelGemCountObject.GetComponent<TextMeshProUGUI>().text = $"0/{(level.display_gems.ContainsKey(currentVariation) ? level.display_gems[currentVariation].ToString() : "?")}";
+
+        if (gameManager.themeChanger2 != null && level.display_background.ContainsKey(currentVariation))
+        {
+            gameManager.themeChanger2.UpdateTheme(level.display_background[currentVariation]);
+        }
+
+        GameObject levelVariationsObject = GameObject.Find($"Level_{level.level_id}_Variations");
+        if (levelVariationsObject != null && levelVariationsObject.transform.childCount > 0)
+        {
+            TextMeshProUGUI variationName = levelVariationsObject.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>();
+            TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
+            variationName.text = textInfo.ToTitleCase(currentVariation);
         }
     }
 }

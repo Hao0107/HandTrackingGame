@@ -148,7 +148,7 @@ public class ScriptLoader : MonoBehaviour
                 }
             }
             if (Directory.Exists(LevelDataFolderPath)) {
-                gameManager.levelRenderer.levelFilePaths.Add(modPath);
+                //gameManager.levelRenderer.levelFilePaths.Add(modPath);
                 gameManager.levelConfig.levelFilePaths.Add(modPath);
                 gameManager.themeChanger.levelFilePaths.Add(modPath);
             }

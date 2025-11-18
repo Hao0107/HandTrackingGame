@@ -15,7 +15,7 @@ public class AudioPlayer : MonoBehaviour
     private bool paused = true;
     private float currentTime = 0f;
 
-    private void Start()
+    private void Awake()
     {
         GameObject levelRenderer = GameObject.Find("LevelRenderer");
         levelConfig = levelRenderer.GetComponent<LevelConfigurator>();
@@ -53,32 +53,46 @@ public class AudioPlayer : MonoBehaviour
 
     public IEnumerator LoadAudioClip()
     {
-        string audioFilePath = "file://" + Path.Combine(Application.persistentDataPath, audioPath + ".mp3");
-        UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(audioFilePath, AudioType.MPEG);
+        string fullPath = Path.Combine(Application.persistentDataPath, audioPath + ".mp3");
 
-        yield return www.SendWebRequest();
-
-        if (www.result == UnityWebRequest.Result.Success)
+        if (!File.Exists(fullPath))
         {
-            audioClip = DownloadHandlerAudioClip.GetContent(www);
+            Debug.LogWarning($"Audio file not found at: {fullPath}. Waiting for Resources copy...");
+            yield break;
+        }
 
-            if (audioClip != null)
+        string url = "file://" + fullPath;
+
+        using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(url, AudioType.MPEG))
+        {
+            yield return www.SendWebRequest();
+
+            if (www.result == UnityWebRequest.Result.ConnectionError || www.result == UnityWebRequest.Result.ProtocolError)
             {
-                audioSource.clip = audioClip;
+                Debug.LogError($"Failed to load audio file: {www.error} | URL: {url}");
             }
             else
             {
-                Debug.LogError("Failed to load audio clip.");
+                audioSource.clip = DownloadHandlerAudioClip.GetContent(www);
+                Debug.Log("Loaded audio from external file: " + fullPath);
             }
-        }
-        else
-        {
-            Debug.LogError("Failed to load audio file: " + www.error);
         }
     }
 
-    public void UpdateAudioClip() {
-        StartCoroutine(LoadAudioClip());
+    public void UpdateAudioClip()
+    {
+        AudioClip clip = Resources.Load<AudioClip>(audioPath);
+
+        if (clip != null)
+        {
+            audioSource.clip = clip;
+            //audioSource.Play();
+            Debug.Log("Loaded audio from Resources: " + audioPath);
+        }
+        else
+        {
+            StartCoroutine(LoadAudioClip());
+        }
     }
 
     private void Update()
@@ -132,13 +146,33 @@ public class AudioPlayer : MonoBehaviour
         }
     }
 
-    public void SeekToZero() {
-        currentTime = 0f;
-        audioSource.time = 0f;
-        started = false;
-    }
-
     public void SeekToTime(float time) {
         audioSource.time = time;
+    }
+
+    public void PlayMusic()
+    {
+        if (audioSource.clip != null && !audioSource.isPlaying)
+        {
+            audioSource.Play();
+        }
+    }
+
+    public void PauseMusic()
+    {
+        if (audioSource.isPlaying)
+        {
+            audioSource.Pause();
+        }
+    }
+
+    public void StopMusic()
+    {
+        audioSource.Stop();
+    }
+
+    public void SeekToZero()
+    {
+        audioSource.time = 0;
     }
 }

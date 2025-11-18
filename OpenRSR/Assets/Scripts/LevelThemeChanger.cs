@@ -132,14 +132,23 @@ public class LevelThemeChanger : MonoBehaviour
     }
     
     public void UpdateData() {
-        //Debug.Log(jsonString);
-        string correctFilePath = levelFilePaths.FirstOrDefault(x => File.Exists(x + "/" + jsonFilePath + ".json"));
-        if (correctFilePath == null) {
-            Debug.LogError("File not found");
-            return;
+        string persistentPath = Path.Combine(Application.persistentDataPath, jsonFilePath + ".json");
+
+        if (File.Exists(persistentPath))
+        {
+            jsonString = File.ReadAllText(persistentPath);
         }
-        jsonString = File.ReadAllText(correctFilePath + "/" + jsonFilePath + ".json");
-        //Debug.Log(jsonString);
+        else
+        {
+            // Fallback Resources
+            TextAsset asset = Resources.Load<TextAsset>(jsonFilePath);
+            if (asset != null) jsonString = asset.text;
+            else
+            {
+                Debug.LogError($"[Theme] File not found: {jsonFilePath}");
+                return;
+            }
+        }
 
         LevelEventData jsonData = JsonConvert.DeserializeObject<LevelEventData>(jsonString);
         levelEvents = jsonData.level_events;

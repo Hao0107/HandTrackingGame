@@ -813,7 +813,7 @@ public class LevelEditor : MonoBehaviour
         string themeJsonString = JsonConvert.SerializeObject(ledata);
         LevelConfigJson m_config = levelConfig.SaveConfig();
         string configJsonString = JsonConvert.SerializeObject(m_config);
-        string SaveFileFolder = levelRenderer.levelFilePaths.FirstOrDefault(x => File.Exists(x + "/" + levelRenderer.jsonFilePath + ".json"));
+        string SaveFileFolder = Application.persistentDataPath;
         //File.WriteAllText(Path.Combine(SaveFileFolder, gre.jsonFilePath + ".json"), groundJsonString);
         //File.WriteAllText(Path.Combine(SaveFileFolder, ere.jsonFilePath + ".json"), enemyJsonString);
         File.WriteAllText(Path.Combine(SaveFileFolder, levelRenderer.jsonFilePath + ".json"), levelJsonString);
@@ -847,10 +847,18 @@ public class LevelEditor : MonoBehaviour
         balus.transform.position = new Vector3(0f, 0.5f, levelConfig.startPos);
     }
 
-    public void OnGoToButtonClick() {
+    public void OnGoToButtonClick()
+    {
         TMP_InputField offsetInputField = GameObject.Find("GoToInputField").GetComponent<TMP_InputField>();
-        int offset = int.Parse(offsetInputField.text);
-        GoToPosition(offset);
+        int offset;
+        if (int.TryParse(offsetInputField.text, out offset))
+        {
+            GoToPosition(offset);
+        }
+        else
+        {
+            Debug.LogError("Invalid input for Go To Position");
+        }
     }
 
     public void GoToPosition(int position) {
