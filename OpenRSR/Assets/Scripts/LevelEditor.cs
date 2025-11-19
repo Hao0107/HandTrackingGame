@@ -216,31 +216,63 @@ public class LevelEditor : MonoBehaviour
     // This is what replaced Mihnea with Workspace
     public void editorTransition() {
         if (!isInEditor) {
-        //gre.enabled = false;
-        //ere.enabled = false;
-        levelRenderer.enabled = false;
-        manager.enabled = false;
-        GFreeze.enabled = false;
-        gamePlayCanvas.SetActive(false);
-        gameEditCanvas.SetActive(true);
-        CFollow.enabled = false;
-        sphd.enabled = false;
-        sphm.enabled = false;
-        balus.transform.position = new Vector3(0f, 0.5f, levelConfig.startPos);
-        Vector3 camPos = new Vector3(0f, 10f, 0f);
-        Quaternion q = Quaternion.Euler(90f, 0f, 0f);
-        m_camera.transform.position = camPos;
-        m_camera.transform.rotation = q;
-        ClearEverything();
-        themeChanger.UpdateData();
-        //gre.UpdateData();
-        //ere.UpdateData();
-        levelRenderer.UpdateData();
-        //gdata = gre.GetData();
-        //edata = ere.GetData();
-        ldata = levelRenderer.GetData();
-        ledata = themeChanger.GetData();
-        List<List<int>> gpositions = ldata.tiles;
+            if (levelRenderer != null) levelRenderer.enabled = false;
+            if (manager != null) manager.enabled = false;
+            if (GFreeze != null) GFreeze.enabled = false;
+
+            if (gamePlayCanvas) gamePlayCanvas.SetActive(false);
+            if (gameEditCanvas) gameEditCanvas.SetActive(true);
+
+            if (CFollow != null) CFollow.enabled = false;
+            if (sphd != null) sphd.enabled = false;
+            if (sphm != null) sphm.enabled = false;
+
+            if (balus != null && levelConfig != null)
+                balus.transform.position = new Vector3(0f, 0.5f, levelConfig.startPos);
+
+            Vector3 camPos = new Vector3(0f, 10f, 0f);
+            Quaternion q = Quaternion.Euler(90f, 0f, 0f);
+            if (m_camera != null)
+            {
+                m_camera.transform.position = camPos;
+                m_camera.transform.rotation = q;
+            }
+
+            ClearEverything();
+
+            if (themeChanger != null) themeChanger.UpdateData();
+            //gre.UpdateData();
+            //ere.UpdateData();
+            if (levelRenderer != null) levelRenderer.UpdateData();
+
+            //gdata = gre.GetData();
+            //edata = ere.GetData();
+
+            if (levelRenderer != null) ldata = levelRenderer.GetData();
+            if (themeChanger != null) ledata = themeChanger.GetData();
+
+            if (ldata == null)
+            {
+                Debug.LogWarning("Level Data is Null. Create new data");
+                ldata = new NewLevelJson();
+                for (int i = 0; i < 10; i++)
+                {
+                    ldata.tiles.Add(new List<int> { 0, 0, 0, 0, 0 });
+                    ldata.enemies.Add(new List<int> { 0, 0, 0, 0, 0 });
+                }
+            }
+            if (ldata.tiles == null) ldata.tiles = new List<List<int>>();
+            if (ldata.enemies == null) ldata.enemies = new List<List<int>>();
+
+            if (ledata == null)
+            {
+                ledata = new LevelEventData();
+            }
+            if (ledata.level_events == null)
+            {
+                ledata.level_events = new List<BaseEvent>();
+            }
+            List<List<int>> gpositions = ldata.tiles;
         List<List<int>> epositions = ldata.enemies;
         for (int i = 0; i < gpositions.Count; i++) {
             for (int j = 0; j < gpositions[i].Count; j++) {
@@ -691,6 +723,11 @@ public class LevelEditor : MonoBehaviour
     }
 
     public void saveLevelData() {
+        if (ldata == null || ldata.tiles == null)
+        {
+            Debug.LogError("No data to save!");
+            return;
+        }
         for (int i = ldata.tiles.Count - 1; i >= 0; i--) {
             List<bool> isZero = new List<bool>();
             for (int j = ldata.tiles[i].Count - 1; j >= 0; j--) {

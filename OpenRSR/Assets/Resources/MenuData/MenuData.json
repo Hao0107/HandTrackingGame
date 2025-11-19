@@ -3,6 +3,38 @@
 	"sort_order": "ascending",
 	"mean_type": "arithmetic",
 	"level_list": [
+		
+		{
+			"display_title": {
+				"default": "Laboratorium Occultum"
+			},
+			"display_gems": {
+				"default": 20
+			},
+			"display_crowns": {
+				"default": 0
+			},
+			"display_author": {
+				"default": false
+			},
+			"display_progress": {
+				"default": true
+			},
+			"display_background": {
+				"default": 0
+			},
+			"level_difficulty_easy": {
+				"default": 0.1
+			},
+			"level_difficulty_hard": {
+				"default": 0.2
+			},
+			"level_id": "mylevel",
+			"level_variations": [
+				"default"
+			],
+			"default_variation": "default"
+		},
 		{
 			"display_title": {
 				"default": "Massif"
@@ -113,37 +145,6 @@
 				"new"
 			],
 			"default_variation": "old"
-		},
-		{
-			"display_title": {
-				"default": "MyLevel"
-			},
-			"display_gems": {
-				"default": 20
-			},
-			"display_crowns": {
-				"default": 0
-			},
-			"display_author": {
-				"default": false
-			},
-			"display_progress": {
-				"default": true
-			},
-			"display_background": {
-				"default": 0
-			},
-			"level_difficulty_easy": {
-				"default": 0.1
-			},
-			"level_difficulty_hard": {
-				"default": 0.2
-			},
-			"level_id": "mylevel",
-			"level_variations": [
-				"default"
-			],
-			"default_variation": "default"
 		}
 	]
 }

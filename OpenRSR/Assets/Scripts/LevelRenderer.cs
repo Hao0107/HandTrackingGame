@@ -66,7 +66,7 @@ public class LevelRenderer : MonoBehaviour
         if (data == null || data.tiles.Count == 0)
         {
             UpdateData();
-            // Initialize(); // Uncomment if you need immediate rendering in Start
+             //Initialize(); // Uncomment if you need immediate rendering in Start
         }
     }
 
@@ -155,7 +155,16 @@ public class LevelRenderer : MonoBehaviour
         UpdateData();
         if (data == null) return;
 
-        for (int i = 0; i <= 29; i++)
+        int startPosition = 0;
+        if (GameManager.instance != null && GameManager.instance.levelConfig != null)
+        {
+            startPosition = GameManager.instance.levelConfig.startPos;
+        }
+        int initialRenderLimit = startPosition + 40;
+        if (initialRenderLimit > positionsCount) initialRenderLimit = positionsCount;
+
+        creationStep = Mathf.Max(creationStep, initialRenderLimit - 1);
+        for (int i = 0; i < initialRenderLimit; i++)
         {
             for (int j = 0; j < 5; j++)
             {
@@ -494,7 +503,36 @@ public class LevelRenderer : MonoBehaviour
 
     public NewLevelJson GetData()
     {
-        if (string.IsNullOrEmpty(jsonString)) return null;
-        return JsonConvert.DeserializeObject<NewLevelJson>(jsonString);
+        string persistentPath = Path.Combine(Application.persistentDataPath, jsonFilePath + ".json");
+
+        if (File.Exists(persistentPath))
+        {
+            jsonString = File.ReadAllText(persistentPath);
+        }
+        else
+        {
+            TextAsset asset = Resources.Load<TextAsset>(jsonFilePath);
+            if (asset != null) jsonString = asset.text;
+            else
+            {
+                Debug.LogWarning($"[LevelThemeChanger] Can't find '{jsonFilePath}'. Create Empty data.");
+                NewLevelJson emptyData = new NewLevelJson();
+                for (int i = 0; i < 10; i++)
+                {
+                    emptyData.tiles.Add(new List<int> { 0, 0, 0, 0, 0 });
+                    emptyData.enemies.Add(new List<int> { 0, 0, 0, 0, 0 });
+                }
+                return emptyData;
+            }
+        }
+
+        try
+        {
+            return JsonConvert.DeserializeObject<NewLevelJson>(jsonString);
+        }
+        catch
+        {
+            return new NewLevelJson();
+        }
     }
 }

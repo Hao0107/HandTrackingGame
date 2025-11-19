@@ -101,5 +101,22 @@
 			"b": 50,
 			"a": 255
 		}
+	},
+	{
+		"background_path": "Backgrounds/Background4",
+		"enemy_path": "Enemy1",
+		"general_path": "General1",
+		"ball_color": {
+			"r": 240,
+			"g": 72,
+			"b": 50,
+			"a": 255
+		},
+		"gem_color": {
+			"r": 242,
+			"g": 69,
+			"b": 49,
+			"a": 255
+		}
 	}
 ]
