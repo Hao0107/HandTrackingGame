@@ -3,7 +3,7 @@
     "m_SelectedProcess": {
         "deviceId": "R5CT3173TLE",
         "name": "com.TimmieTudor.OpenRSR",
-        "processId": 2768,
+        "processId": 13465,
         "exited": false
     },
     "m_SelectedPriority": 4,
@@ -11,25 +11,55 @@
         {
             "deviceId": "R5CT3173TLE",
             "name": "com.TimmieTudor.OpenRSR",
-            "processId": 20386,
+            "processId": 18816,
+            "exited": true
+        },
+        {
+            "deviceId": "R5CT3173TLE",
+            "name": "com.TimmieTudor.OpenRSR",
+            "processId": 21182,
+            "exited": true
+        },
+        {
+            "deviceId": "R5CT3173TLE",
+            "name": "com.TimmieTudor.OpenRSR",
+            "processId": 4418,
+            "exited": true
+        },
+        {
+            "deviceId": "R5CT3173TLE",
+            "name": "com.TimmieTudor.OpenRSR",
+            "processId": 7067,
+            "exited": true
+        },
+        {
+            "deviceId": "R5CT3173TLE",
+            "name": "com.sec.android.app.launcher",
+            "processId": 2812,
             "exited": false
         },
         {
             "deviceId": "R5CT3173TLE",
             "name": "com.TimmieTudor.OpenRSR",
-            "processId": 6663,
+            "processId": 23866,
             "exited": false
         },
         {
             "deviceId": "R5CT3173TLE",
             "name": "com.TimmieTudor.OpenRSR",
-            "processId": 24649,
+            "processId": 27698,
             "exited": false
         },
         {
             "deviceId": "R5CT3173TLE",
             "name": "com.TimmieTudor.OpenRSR",
-            "processId": 2768,
+            "processId": 4173,
+            "exited": false
+        },
+        {
+            "deviceId": "R5CT3173TLE",
+            "name": "com.TimmieTudor.OpenRSR",
+            "processId": 13465,
             "exited": false
         }
     ],

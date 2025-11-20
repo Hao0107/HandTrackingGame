@@ -535,4 +535,30 @@ public class LevelRenderer : MonoBehaviour
             return new NewLevelJson();
         }
     }
+
+    // xoa map hien tai (dung cho khi dang o main Menu va load level moi)
+    //public void ClearMapVisuals()
+    //{
+    //    foreach (var row in levelVisuals)
+    //    {
+    //        foreach (var item in row)
+    //        {
+    //            if (item.Tile != null) Destroy(item.Tile);
+    //            if (item.Enemy != null) Destroy(item.Enemy);
+    //        }
+    //    }
+
+    //    levelVisuals.Clear();
+    //    for (int i = 0; i < positionsCount; i++)
+    //    {
+    //        levelVisuals.Add(new List<Storage>(new Storage[7] { new Storage(), new Storage(), new Storage(), new Storage(), new Storage(), new Storage(), new Storage() }));
+    //    }
+
+    //    creationStep = 0;
+    //    checkedTiles.Clear();
+    //    for (int i = 0; i < positionsCount; i++)
+    //    {
+    //        checkedTiles.Add(new List<bool>() { false, false, false, false, false });
+    //    }
+    //}
 }

@@ -46,15 +46,13 @@ public class MyHandTrackingController : MonoBehaviour
     private float _rightX = 0f;
 
     private bool _wasGrabbingLastFrame_MainThread = false;
+    private bool _waitForRelease = true;
 
     // Khóa luồng
     private readonly object _dataLock = new object();
 
     void Start()
     {
-        if (sphereDragger == null) Debug.LogError("Thiếu SphereDragger!");
-        if (handLandmarkerRunner == null) Debug.LogError("Thiếu Runner!");
-
         handLandmarkerRunner.OnLandmarkerResult.AddListener(OnHandLandmarks);
     }
 
@@ -121,7 +119,6 @@ public class MyHandTrackingController : MonoBehaviour
         }
     }
 
-    // --- LUỒNG CHÍNH (UNITY UPDATE) ---
     void Update()
     {
         bool hasNewData = false;
@@ -145,6 +142,37 @@ public class MyHandTrackingController : MonoBehaviour
         }
 
         if (!hasNewData && Time.frameCount % 5 != 0) return; // Tối ưu: không cần tính toán lại nếu không có data mới (trừ khi cần lerp)
+
+        if (gameManager == null || gameManager.GFreeze == null) return;
+
+        if (gameManager.isInMainMenu)
+        {
+            _waitForRelease = true;
+            if (sphereDragger != null) sphereDragger.SetDragging(false);
+            return;
+        }
+
+        // Ngăn không cho điều khiển khi game over, trong trình chỉnh sửa cấp độ, hoặc khi bảng cài đặt mở, hoac o man hinh chinh
+        if (gameManager.isGameOver) return;
+        if (gameManager.levelEdit != null && gameManager.levelEdit.isInEditor) return;
+        if (gameManager.settingsPanel != null && gameManager.settingsPanel.activeSelf) return;
+
+        bool isGlobalGrabbing = false;
+        bool leftGrab = _leftDetected && _leftGrabbing;
+        bool rightGrab = _rightDetected && _rightGrabbing;
+
+        if (_waitForRelease)
+        {
+            if (!leftGrab && !rightGrab)
+            {
+                _waitForRelease = false;
+            }
+            else
+            {
+                return;
+            }
+        }
+        // End ngăn không cho điều khiển
 
         // 2. LOGIC CHỌN TAY ĐIỀU KHIỂN (CORE LOGIC)
 
@@ -191,7 +219,7 @@ public class MyHandTrackingController : MonoBehaviour
         }
 
         // 3. THỰC HIỆN ĐIỀU KHIỂN
-        bool isGlobalGrabbing = (_currentControllingHand != "None");
+        isGlobalGrabbing = (_currentControllingHand != "None");
         float targetX = _currentSmoothedX;
 
         if (_currentControllingHand == "Right") targetX = _rightX;

@@ -130,11 +130,20 @@ namespace Mediapipe.Unity
 
       availableSources = WebCamTexture.devices;
 
-      if (availableSources != null && availableSources.Length > 0)
-      {
-        webCamDevice = availableSources[0];
-      }
-    }
+            if (availableSources != null && availableSources.Length > 0)
+            {
+                webCamDevice = availableSources[0];
+
+                foreach (var device in availableSources)
+                {
+                    if (device.isFrontFacing)
+                    {
+                        webCamDevice = device;
+                        break;
+                    }
+                }
+            }
+        }
 
     private IEnumerator GetPermission()
     {
@@ -241,7 +250,12 @@ namespace Mediapipe.Unity
       Stop();
       if (webCamDevice is WebCamDevice valueOfWebCamDevice)
       {
-        webCamTexture = new WebCamTexture(valueOfWebCamDevice.name, resolution.width, resolution.height, (int)resolution.frameRate);
+                // Default way to initialize WebCamTexture
+                webCamTexture = new WebCamTexture(valueOfWebCamDevice.name, resolution.width, resolution.height, (int)resolution.frameRate);
+
+                // For some devices, certain resolutions do not work well. So here we use a fixed resolution.
+                //webCamTexture = new WebCamTexture(valueOfWebCamDevice.name, 1280, 720, 30); 
+        
         return;
       }
       throw new InvalidOperationException("Cannot initialize WebCamTexture because WebCamDevice is not selected");

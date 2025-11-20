@@ -195,7 +195,7 @@ public class GameManager : MonoBehaviour
             isDataDownloaded = true;
             isDataDownloadedCache = true;
 
-            LoadLevel("mylevel");
+            //LoadLevel("mylevel");
         }
         else
         {
@@ -536,7 +536,18 @@ public class GameManager : MonoBehaviour
             }
             //Debug.Log("X: " + xDirection + " Z: " + zDirection);
             //Debug.Log(levelRenderer.levelVisuals[collisionZ][collisionX].Tile?.GetComponentInParent<ManagerDynamicGroups>() == null);
-            levelRenderer.levelVisuals[collisionZ][collisionX+1].Tile?.GetComponentInParent<ManagerDynamicGroups>()?.TriggerGroup(xDirection, zDirection, collisionZ, collisionX+1);
+            //levelRenderer.levelVisuals[collisionZ][collisionX+1].Tile?.GetComponentInParent<ManagerDynamicGroups>()?.TriggerGroup(xDirection, zDirection, collisionZ, collisionX+1);
+            var targetStorage = levelRenderer.levelVisuals[collisionZ][collisionX + 1];
+
+            if (targetStorage != null && targetStorage.Tile != null)
+            {
+                var dynamicGroup = targetStorage.Tile.GetComponentInParent<ManagerDynamicGroups>();
+
+                if (dynamicGroup != null)
+                {
+                    dynamicGroup.TriggerGroup(xDirection, zDirection, collisionZ, collisionX + 1);
+                }
+            }
         } else if (other.gameObject.CompareTag("LevelEnd") && !isGameOver) {
             rb.position = new Vector3(rb.position.x, 0.5f, rb.position.z - 0.1f);
             sphm.isNotFalling = true;

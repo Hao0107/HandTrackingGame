@@ -170,7 +170,14 @@ public class LevelConfigurator : MonoBehaviour
         // Find Start Portal if needed
         if (startPortalObject2 == null)
         {
-            startPortalObject2 = GameObject.Find("DeceBalus_Pod_Start");
+            foreach (GameObject obj in Resources.FindObjectsOfTypeAll<GameObject>())
+            {
+                if (obj.name == "DeceBalus_Pod_Start" && obj.hideFlags == HideFlags.None)
+                {
+                    startPortalObject2 = obj;
+                    break;
+                }
+            }
         }
 
         // Apply Portal State
@@ -178,13 +185,14 @@ public class LevelConfigurator : MonoBehaviour
         {
             if (startPortal)
             {
-                startPortalObject2.SetActive(true);
                 startPortalObject2.transform.position = new Vector3(0f, 0f, startPos);
+                startPortalObject2.SetActive(true);
             }
             else
             {
-                startPortalObject2.SetActive(false);
-                startPortalObject2.transform.position = new Vector3(0f, 0f, startPos);
+                //startPortalObject2.SetActive(false);
+                //startPortalObject2.transform.position = new Vector3(0f, 0f, startPos);
+                Debug.LogError("Can't find 'DeceBalus_Pod_Start'!");
             }
         }
     }

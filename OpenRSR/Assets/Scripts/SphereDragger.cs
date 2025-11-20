@@ -56,26 +56,21 @@ public class SphereDragger : MonoBehaviour
     {
         if (isDragging && !manager.isGamePaused && !manager.isGameOver)
         {
-            // Tính toán vị trí X dự kiến
-            float xPos = maxOffset * currentNormalizedX * Screen.width / Screen.height;
+            float xPos;
+            if (Screen.width < Screen.height)
+            {
+                xPos = maxOffset * currentNormalizedX * 1.3f;
+            }
+            else
+            {
+                xPos = maxOffset * currentNormalizedX * ((float)Screen.width / Screen.height);
+            }
 
-            // --- BỔ SUNG QUAN TRỌNG: GIỚI HẠN DI CHUYỂN (CLAMP) ---
-            // Giới hạn xPos không được vượt quá -maxOffset và +maxOffset
-            // Ví dụ: Nếu maxOffset là 2.5, xPos sẽ luôn nằm trong khoảng -2.5 đến 2.5
-            xPos = Mathf.Clamp(xPos, -maxOffset, maxOffset);
-            // ------------------------------------------------------
-
-            // Di chuyển vật thể
-            // Lưu ý: Dùng MovePosition của Rigidbody sẽ mượt và vật lý hơn Translate
+            xPos = Mathf.Clamp(xPos, -2.5f, 2.5f);
             Vector3 targetPosition = new Vector3(xPos, transform.position.y, transform.position.z);
-
-            // Cách 1: Dịch chuyển cứng (như code cũ của bạn)
-            // transform.position = new Vector3(xPos, transform.position.y, transform.position.z);
-
-            // Cách 2: Dịch chuyển mượt mà nhưng dứt khoát (Khuyên dùng)
             transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * 20f);
 
-            rb.position = transform.position;
+            if (rb != null) rb.position = transform.position;
         }
     }
 }
