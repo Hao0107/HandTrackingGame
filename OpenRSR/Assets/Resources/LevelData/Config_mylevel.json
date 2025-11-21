@@ -1,9 +1,0 @@
-{
-    "level_name": "Wild Hunt",
-    "level_author": "Hao",
-    "level_speed": 8.0,
-    "start_pos": 0,
-    "music_path": "Music/Laboratorium-Occultum",
-    "worldshow_path": null,
-    "start_portal": true
-}
