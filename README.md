@@ -1,6 +1,4 @@
 # HandTrackingGame
-Unity Project using mediapipe HandTracking 
-
-Keystore Password: 123456
+Unity Project using mediapipe HandTracking
 
 ![Hand LandMark](/hand_landmarks.png)
