@@ -6,26 +6,25 @@ using System.Collections.Generic;
 
 public class MyHandTrackingController : MonoBehaviour
 {
-    [Header("Đối tượng cần liên kết")]
+    [Header("Link Object")]
     public SphereDragger sphereDragger;
     public HandLandmarkerRunner handLandmarkerRunner;
     public GameManager gameManager;
 
-    [Header("Cài đặt điều khiển")]
+    [Header("Controll settings")]
     public float grabThreshold = 0.1f;
     public int controlLandmarkId = 8; // Đầu ngón trỏ
     public bool flipXAxis = false;
 
-    [Header("Độ Nhạy & Làm Mượt")]
+    [Header("Smooth")]
     [Range(1f, 50f)]
     public float smoothSpeed = 12f;
 
-    // --- Biến nội bộ để lưu trạng thái ---
+    // --- state variable ---
     private float _currentSmoothedX = 0.5f;
     private string _currentControllingHand = "None"; // "Left", "Right", hoặc "None"
 
-    // --- Biến Thread-Safe (Nháp) ---
-    // Chúng ta cần lưu dữ liệu riêng cho từng tay
+    // --- Thread-Safe variable---
     private bool _leftHandDetected_Thread = false;
     private bool _leftHandGrabbing_Thread = false;
     private float _leftHandX_Thread = 0.5f;
@@ -36,7 +35,7 @@ public class MyHandTrackingController : MonoBehaviour
 
     private bool _dataUpdated_Thread = false;
 
-    // --- Biến Main Thread ---
+    // --- Main Thread variable ---
     private bool _leftDetected = false;
     private bool _leftGrabbing = false;
     private float _leftX = 0f;
@@ -48,7 +47,7 @@ public class MyHandTrackingController : MonoBehaviour
     private bool _wasGrabbingLastFrame_MainThread = false;
     private bool _waitForRelease = true;
 
-    // Khóa luồng
+    // data lock variable
     private readonly object _dataLock = new object();
 
     void Start()
@@ -62,10 +61,9 @@ public class MyHandTrackingController : MonoBehaviour
             handLandmarkerRunner.OnLandmarkerResult.RemoveListener(OnHandLandmarks);
     }
 
-    // --- LUỒNG PHỤ (MEDIA PIPE) ---
     private void OnHandLandmarks(HandLandmarkerResult result)
     {
-        // Biến tạm
+        // temp variable
         bool t_leftDet = false, t_leftGrab = false; float t_leftX = 0.5f;
         bool t_rightDet = false, t_rightGrab = false; float t_rightX = 0.5f;
 
@@ -77,9 +75,9 @@ public class MyHandTrackingController : MonoBehaviour
                 if (i >= result.handedness.Count) break;
 
                 var landmarks = result.handLandmarks[i].landmarks;
-                var handedness = result.handedness[i].categories[0].categoryName; // "Left" hoặc "Right"
+                var handedness = result.handedness[i].categories[0].categoryName; // handedness cho biet "Left" or "Right"
 
-                // Tính toán
+                // Tính toán tọa độ X thô và trạng thái nắm tay
                 float rawX = landmarks[controlLandmarkId].x;
                 if (flipXAxis) rawX = 1.0f - rawX;
 
@@ -101,10 +99,11 @@ public class MyHandTrackingController : MonoBehaviour
                     t_rightGrab = isGrabbing;
                     t_rightX = rawX;
                 }
+
+                //Debug.LogWarning($"[RAW LANDMARK] X: {rawX:F4} | Grab: {isGrabbing} | Thread: {System.Threading.Thread.CurrentThread.ManagedThreadId}");
             }
         }
 
-        // Ghi vào biến Thread-Safe
         lock (_dataLock)
         {
             _leftHandDetected_Thread = t_leftDet;
@@ -153,7 +152,22 @@ public class MyHandTrackingController : MonoBehaviour
         }
 
         // Ngăn không cho điều khiển khi game over, trong trình chỉnh sửa cấp độ, hoặc khi bảng cài đặt mở, hoac o man hinh chinh
-        if (gameManager.isGameOver) return;
+        if (gameManager.isGameOver)
+        {
+            bool isLeftGrabbing = _leftDetected && _leftGrabbing;
+            bool isRightGrabbing = _rightDetected && _rightGrabbing;
+
+            if (isLeftGrabbing && isRightGrabbing)
+            {
+                Debug.Log("detect 2 hand grabbing --> retry");
+
+                _waitForRelease = true;
+
+                gameManager.RestartGame();
+            }
+            return;
+        }
+        ;
         if (gameManager.levelEdit != null && gameManager.levelEdit.isInEditor) return;
         if (gameManager.settingsPanel != null && gameManager.settingsPanel.activeSelf) return;
 
@@ -182,7 +196,6 @@ public class MyHandTrackingController : MonoBehaviour
             if (_rightDetected && _rightGrabbing)
             {
                 _currentControllingHand = "Right";
-                // Nhảy ngay lập tức đến vị trí tay mới (không Lerp) để tránh vật thể bay từ xa tới
                 _currentSmoothedX = _rightX;
             }
             else if (_leftDetected && _leftGrabbing)
@@ -227,6 +240,8 @@ public class MyHandTrackingController : MonoBehaviour
 
         // Làm mượt chuyển động
         _currentSmoothedX = Mathf.Lerp(_currentSmoothedX, targetX, Time.deltaTime * smoothSpeed);
+
+        //Debug.Log($"[MAIN THREAD] Target X (Raw): {targetX:F4} | Smoothed X: {_currentSmoothedX:F4}");
 
         // Cập nhật SphereDragger
         if (sphereDragger != null)

@@ -74,6 +74,10 @@ public class GameManager : MonoBehaviour
     public Dictionary<string, FrameAnim> anims = new Dictionary<string, FrameAnim>();
     public Dictionary<string, List<FrameAnim>> animGroups = new Dictionary<string, List<FrameAnim>>();
     private Coroutine downloadCoroutine;
+
+    [Header("Tutorial Panel")]
+    public GameObject tutorialPanel_1;
+    public GameObject tutorialPanel_2;
     IEnumerator UpdateCache()
     {
         while (true)
@@ -346,6 +350,8 @@ public class GameManager : MonoBehaviour
         mainMenuNormalTile = Instantiate(levelRenderer.tileSets[1], new Vector3(0f, 0f, rb.position.z), Quaternion.identity);
         MainMenuScripts.instance.ResetMenu();
         mainMenuCanvas.SetActive(true);
+        gameOverPanel.SetActive(false);
+        isGameOver = false;
         SetIsInMainMenu(true);
     }
 
@@ -1169,6 +1175,27 @@ public class GameManager : MonoBehaviour
                 Debug.LogError($"ERROR: can't find file '{resourcePath}' in Resources!");
             }
         }
+    }
+
+    public void OpenInstructionPanel()
+    {
+        tutorialPanel_1.SetActive(true);
+        tutorialPanel_2.SetActive(false);
+        gameOverPanel.SetActive(false);
+    }
+
+    public void OpenSecondInstructionPanel()
+    {
+        tutorialPanel_1.SetActive(false);
+        tutorialPanel_2.SetActive(true);
+        gameOverPanel.SetActive(false);
+    }
+
+    public void CloseInstructionPanel()
+    {
+        tutorialPanel_1.SetActive(false);
+        tutorialPanel_2.SetActive(false);
+        gameOverPanel.SetActive(true);
     }
     //public void GenerateMyLongLevel()
     //{

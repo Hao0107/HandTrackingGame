@@ -152,6 +152,13 @@ public class MainMenuScripts : MonoBehaviour
         scriptLoader = GameObject.Find("ModManager").GetComponent<ScriptLoader>();
         scriptLoader.AppendMenuData();
         CreateLevelObjects();
+
+        GameObject pod = GameObject.Find("DeceBalus_Pod_Start");
+        if (pod != null)
+        {
+            pod.SetActive(false);
+        }
+
         foreach (MenuLevelJsonWithVariations level in menuData.level_list) {
             GameObject levelCoverObject = GameObject.Find($"Level_{level.level_id}_Cover_Button");
             levelCoverObject.GetComponent<Button>().onClick.AddListener(() => {
@@ -288,6 +295,10 @@ public class MainMenuScripts : MonoBehaviour
             mhn_LevelCrowns.name = $"Level_{level.level_id}_Crowns";
             GameObject mhn_LevelVariations = mhn_levelItem.transform.GetChild(6).gameObject;
             mhn_LevelVariations.name = $"Level_{level.level_id}_Variations";
+        }
+        if (levelItem != null)
+        {
+            levelItem.SetActive(false);
         }
     }
 

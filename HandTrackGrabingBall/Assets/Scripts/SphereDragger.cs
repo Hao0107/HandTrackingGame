@@ -15,20 +15,19 @@ public class SphereDragger : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         if (manager == null)
         {
-            Debug.LogError("SphereDragger chưa được gán GameManager trong Inspector!");
+            Debug.LogError("SphereDragger not set in Inspector!");
         }
     }
 
     /// <summary>
-    /// Hàm này được gọi bởi Script MediaPipe của bạn.
+    /// Hàm này được gọi bởi Script MediaPipe.
     /// 'isGrabbing' = true nếu tay đang nắm, false nếu đang mở.
     /// </summary>
     public void SetDragging(bool isGrabbing)
     {
         if (manager == null)
         {
-            Debug.LogError("LỖI: Biến 'manager' trong SphereDragger chưa được gán!");
-            return; // Dừng lại để không gây lỗi
+            return;
         }
 
         if (manager.isGamePaused || manager.isGameOver)
@@ -41,14 +40,14 @@ public class SphereDragger : MonoBehaviour
     }
 
     /// <summary>
-    /// Hàm này được gọi bởi Script MediaPipe của bạn.
+    /// Hàm này được gọi bởi Script MediaPipe.
     /// 'screenNormalizedX' là tọa độ X của tay (ví dụ: ngón trỏ)
     /// với giá trị từ 0.0 (cạnh trái màn hình) đến 1.0 (cạnh phải màn hình).
     /// </summary>
     public void UpdateHandPosition(float screenNormalizedX)
     {
         // Chuyển đổi từ 0.0 -> 1.0 thành -1.0 -> 1.0
-        // Giống như logic '((mousePos.x) / Screen.width) * 2f - 1f;' của bạn
+        // Giống như logic '((mousePos.x) / Screen.width) * 2f - 1f;'
         this.currentNormalizedX = (screenNormalizedX * 2f) - 1f;
     }
 
@@ -67,6 +66,9 @@ public class SphereDragger : MonoBehaviour
             }
 
             xPos = Mathf.Clamp(xPos, -2.5f, 2.5f);
+
+            //Debug.Log($"[WORLD POS] Final World X: {xPos:F4} | Max Range: {maxOffset}");
+
             Vector3 targetPosition = new Vector3(xPos, transform.position.y, transform.position.z);
             transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * 20f);
 

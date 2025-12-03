@@ -3,7 +3,7 @@
     "m_SelectedProcess": {
         "deviceId": "R5CT3173TLE",
         "name": "com.ahgame.grabyourballs",
-        "processId": 15076,
+        "processId": 9728,
         "exited": false
     },
     "m_SelectedPriority": 4,
@@ -66,6 +66,12 @@
             "deviceId": "R5CT3173TLE",
             "name": "com.ahgame.grabyourballs",
             "processId": 15076,
+            "exited": false
+        },
+        {
+            "deviceId": "R5CT3173TLE",
+            "name": "com.ahgame.grabyourballs",
+            "processId": 9728,
             "exited": false
         }
     ],
