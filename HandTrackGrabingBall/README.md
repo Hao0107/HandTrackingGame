@@ -1,5 +1,5 @@
 # README
-Rolling Sky fangame engine made with Unity3D
+HandTracking for Rolling Sky fangame made with Unity3D
 
 ## Features
 Core Mechanics: Faithful recreation of Rolling Sky gameplay (ball movement, physics, and tile-based levels).
